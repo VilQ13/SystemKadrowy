@@ -48,7 +48,9 @@
         <div class="mt-3">
             <a asp-controller="Pracownicy" asp-action="Details" asp-route-id="@Model.PracownikId" class="btn btn-secondary">Wróć do pracownika</a>
 
-            <button class="btn btn-outline-dark" onclick="window.print()">🖨️ Drukuj (Przeglądarka)</button>
+            <a asp-controller="Wyplaty" asp-action="Drukuj" asp-route-id="@Model.Id" class="btn btn-sm btn-dark" target="_blank">
+                🖨️ Drukuj
+            </a>
         </div>
     </div>
 </div>

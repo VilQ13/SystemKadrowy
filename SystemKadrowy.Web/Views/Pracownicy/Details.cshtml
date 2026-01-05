@@ -75,6 +75,10 @@ else
                         <a asp-controller="Wyplaty" asp-action="Details" asp-route-id="@wyplata.Id" class="btn btn-sm btn-outline-primary">
                             📄 Podgląd
                         </a>
+
+                        <a asp-controller="Wyplaty" asp-action="Drukuj" asp-route-id="@wyplata.Id" class="btn btn-sm btn-dark" target="_blank">
+                            🖨️ Drukuj
+                        </a>
                     </td>
                 </tr>
             }

@@ -1,0 +1,151 @@
+﻿@model SystemKadrowy.Core.Domain.Wyplata
+
+@{
+    Layout = null; // WAŻNE: Wyłączamy główny szablon strony!
+}
+
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="utf-8" />
+    <title>Pasek Wynagrodzeń - @Model.Pracownik.Nazwisko</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" />
+
+    <style>
+        body { font-family: 'Times New Roman', serif; padding: 40px; }
+        .naglowek { border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 20px; }
+        .sekcja { margin-bottom: 15px; }
+        .podpis { margin-top: 50px; border-top: 1px dashed #000; width: 200px; text-align: center; font-size: 0.8rem; }
+
+        /* Ukryj przycisk drukowania na wydruku papierowym */
+        @@media print {
+            .no-print { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="text-end mb-4 no-print">
+        <button onclick="window.print()" class="btn btn-primary">🖨️ Drukuj / Zapisz jako PDF</button>
+        <button onclick="window.close()" class="btn btn-secondary">Zamknij okno</button>
+    </div>
+
+    <div class="container">
+
+        <div class="row naglowek">
+            <div class="col-6">
+                <h4>Firma Testowa Sp. z o.o.</h4>
+                <small>ul. Programistów 1, 00-001 Warszawa</small><br />
+                <small>NIP: 123-456-78-90</small>
+            </div>
+            <div class="col-6 text-end">
+                <h5>PASEK WYNAGRODZEŃ</h5>
+                <p>Za okres: <strong>@Model.Miesiac / @Model.Rok</strong></p>
+                <p>Data wypłaty: @Model.DataGenerowania.ToShortDateString()</p>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-12">
+                <strong>Pracownik:</strong> @Model.Pracownik.Imie @Model.Pracownik.Nazwisko <br />
+                <strong>PESEL:</strong> @Model.Pracownik.PESEL
+            </div>
+        </div>
+
+        <table class="table table-bordered table-sm">
+            <thead class="table-light">
+                <tr>
+                    <th>Składnik</th>
+                    <th class="text-end">Kwota</th>
+                    <th>Opis</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Wynagrodzenie Zasadnicze (Brutto)</td>
+                    <td class="text-end">@Model.Brutto.ToString("N2") zł</td>
+                    <td>@(Model.PrzepracowaneGodziny > 0 ? $"Godziny: {Model.PrzepracowaneGodziny}" : "Etat")</td>
+                </tr>
+                @if (Model.PremiaBrutto > 0)
+                {
+                    <tr>
+                        <td>Premia / Dodatki</td>
+                        <td class="text-end">@Model.PremiaBrutto.ToString("N2") zł</td>
+                        <td>Składnik opodatkowany</td>
+                    </tr>
+                }
+                @if (Model.WynagrodzenieChorobowe > 0)
+                {
+                    <tr>
+                        <td>Wynagrodzenie Chorobowe</td>
+                        <td class="text-end">@Model.WynagrodzenieChorobowe.ToString("N2") zł</td>
+                        <td>Płatne 80%</td>
+                    </tr>
+                }
+                @if (Model.PotracenieZaNieobecnosci > 0)
+                {
+                    <tr>
+                        <td>Potrącenia za nieobecności</td>
+                        <td class="text-end text-danger">-@Model.PotracenieZaNieobecnosci.ToString("N2") zł</td>
+                        <td>Urlopy bezpłatne / L4</td>
+                    </tr>
+                }
+
+                <tr class="table-secondary fw-bold">
+                    <td>SUMA PRZYCHODÓW (Brutto)</td>
+                    <td class="text-end">@((Model.Brutto + Model.PremiaBrutto + Model.WynagrodzenieChorobowe).ToString("N2")) zł</td>
+                    <td></td>
+                </tr>
+
+                <tr><td colspan="3" class="bg-light text-center"><small>ODLICZENIA</small></td></tr>
+
+                <tr>
+                    <td>Składki ZUS (Społeczne)</td>
+                    <td class="text-end text-danger">-@Model.ZUS_Razem.ToString("N2") zł</td>
+                    <td>Emerytalne, Rentowe, Chorobowe</td>
+                </tr>
+                <tr>
+                    <td>Składka Zdrowotna</td>
+                    <td class="text-end text-danger">-@Model.SkladkaZdrowotna.ToString("N2") zł</td>
+                    <td>9% podstawy</td>
+                </tr>
+                <tr>
+                    <td>Zaliczka na Podatek (PIT)</td>
+                    <td class="text-end text-danger">-@Model.Podatek.ToString("N2") zł</td>
+                    <td>Po odliczeniu ulgi i KUP</td>
+                </tr>
+                @if (Model.PotraceniaKomornicze > 0)
+                {
+                    <tr>
+                        <td>Potrącenia Komornicze / Inne</td>
+                        <td class="text-end text-danger">-@Model.PotraceniaKomornicze.ToString("N2") zł</td>
+                        <td>Z wynagrodzenia netto</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <div class="row mt-4">
+            <div class="col-6">
+                <div class="podpis">
+                    Podpis pracownika
+                </div>
+            </div>
+            <div class="col-6 text-end">
+                <h3>DO WYPŁATY:</h3>
+                <h1 class="display-6 fw-bold">@Model.DoWyplaty.ToString("N2") zł</h1>
+                <div class="podpis float-end">
+                    Sporządził (Księgowość)
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-5">
+            <div class="col-12 text-center text-muted" style="font-size: 10px;">
+                Dokument wygenerowany elektronicznie w Systemie Kadrowym v1.0. Data wydruku: @DateTime.Now
+            </div>
+        </div>
+
+    </div>
+</body>
+</html>

@@ -169,5 +169,17 @@ namespace SystemKadrowy.Web.Controllers
 
             return View(wyplata);
         }
+
+        // GET: Wyplaty/Drukuj/5
+        public async Task<IActionResult> Drukuj(int id)
+        {
+            var wyplata = await _context.Wyplaty
+                .Include(w => w.Pracownik) // Musimy mieć dane osobowe
+                .FirstOrDefaultAsync(w => w.Id == id);
+
+            if (wyplata == null) return NotFound();
+
+            return View(wyplata);
+        }
     }
 }
