@@ -13,6 +13,8 @@ namespace SystemKadrowy.Core.Interfaces
     {
         public decimal Brutto { get; set; }
         public decimal PremiaBrutto { get; set; } // Dodatek (opodatkowany)
+        public decimal WynagrodzenieChorobowe { get; set; }
+        public decimal PotracenieZaNieobecnosci { get; set; }
         public decimal CalicowiteBrutto { get; set; } // Podstawa + Premia
         public decimal PotraceniaKomornicze { get; set; } // Odejmowane z ręki
         public decimal DoWyplaty { get; set; } // To co faktycznie idzie przelewem
@@ -29,6 +31,12 @@ namespace SystemKadrowy.Core.Interfaces
 
     public interface IKalkulatorPlac
     {
-        WynikWyplaty Oblicz(Umowa umowa, decimal premia = 0, decimal potracenie = 0, decimal godziny = 168);
+        WynikWyplaty Oblicz(
+            Umowa umowa, 
+            decimal premia = 0, 
+            decimal potracenie = 0, 
+            decimal godziny = 168, 
+            List<Nieobecnosc>? nieobecnosci = null
+            );
     }
 }

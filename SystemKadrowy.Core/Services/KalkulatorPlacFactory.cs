@@ -12,77 +12,128 @@ namespace SystemKadrowy.Core.Services
     public class KalkulatorPlacService : IKalkulatorPlac
     {
         // Główna metoda
-        public WynikWyplaty Oblicz(Umowa umowa, decimal premia = 0, decimal potracenie = 0, decimal godziny = 168)
+        public WynikWyplaty Oblicz(
+            Umowa umowa, 
+            decimal premia = 0, 
+            decimal potracenie = 0, 
+            decimal godziny = 168, 
+            List<Nieobecnosc>? nieobecnosci = null
+            )
         {
-            // 1. Logika wstępna: Ustalamy, jaka jest kwota bazowa do obliczeń.
-            // Nie modyfikujemy obiektu 'umowa', tylko tworzymy nową zmienną.
             decimal bazaBrutto = 0;
 
+            // Zmienne do przechowywania wyników L4/Urlopów
+            decimal wyliczoneChorobowe = 0;
+            decimal wyliczonePotracenieZaDni = 0;
+
+            // 1. Logika dla STALEJ PENSJI MIESIĘCZNEJ
             if (umowa.SposobWynagradzania == SposobWynagradzania.StalaMiesieczna)
             {
-                // Jeśli stała pensja -> ignorujemy godziny, bierzemy kwotę z umowy
                 bazaBrutto = umowa.StawkaBrutto;
+
+                // Jeśli są jakieś nieobecności, musimy pomniejszyć pensję
+                if (nieobecnosci != null && nieobecnosci.Any())
+                {
+                    // Zgodnie z prawem, przy stałej pensji, dzielimy zawsze przez 30, 
+                    // aby uzyskać stawkę za 1 dzień nieobecności.
+                    decimal stawkaDziennia = umowa.StawkaBrutto / 30m;
+
+                    foreach (var n in nieobecnosci)
+                    {
+                        // Uproszczenie: Używamy LiczbaDniRoboczych (lub kalendarzowych dla L4 - tu zależy co wpiszesz w formularzu)
+                        int dni = n.LiczbaDniRoboczych;
+
+                        if (n.Typ == TypNieobecnosc.Chorobowe)
+                        {
+                            // Za chorobę zabieramy całą dniówkę...
+                            wyliczonePotracenieZaDni += stawkaDziennia * dni;
+
+                            // ...ale oddajemy 80% jako wynagrodzenie chorobowe
+                            wyliczoneChorobowe += (stawkaDziennia * 0.8m) * dni;
+                        }
+                        else if (n.Typ == TypNieobecnosc.UrlopBezplatny || n.Typ == TypNieobecnosc.NieobecnoscNieusprawiedliwiona)
+                        {
+                            // Tutaj tylko zabieramy pieniądze, nic nie oddajemy
+                            wyliczonePotracenieZaDni += stawkaDziennia * dni;
+                        }
+                        // Urlop Wypoczynkowy (Płatny 100%) - nic nie robimy, bo pensja zostaje taka sama.
+                    }
+                }
             }
-            else // SposobWynagradzania.StawkaGodzinowa
+            else // STAWKA GODZINOWA
             {
-                // Jeśli stawka godzinowa -> mnożymy stawkę * godziny
+                // Przy stawce godzinowej nie bawimy się w potrącenia – po prostu wpisujesz
+                // mniej przepracowanych godzin w parametrze 'godziny'.
                 bazaBrutto = umowa.StawkaBrutto * godziny;
             }
 
-            // 2. Przekazujemy WYLICZONĄ BAZĘ (bazaBrutto) do konkretnych kalkulatorów.
-            // Dzięki temu metody prywatne nie muszą wiedzieć, czy to było z godziny czy z etatu.
+            // 2. Ustalamy "To co zostało z pensji po potrąceniach"
+            // To jest kwota, od której będziemy liczyć ZUS i podatki
+            decimal podstawaPoPotraceniach = bazaBrutto - wyliczonePotracenieZaDni;
+
+            // Zabezpieczenie, żeby nie wyszło ujemne brutto
+            if (podstawaPoPotraceniach < 0) podstawaPoPotraceniach = 0;
+
+            // 3. Przekazujemy dane do szczegółowych kalkulatorów
             switch (umowa.TypUmowy)
             {
                 case TypUmowy.UmowaOPrace:
-                    return ObliczUoP(umowa, bazaBrutto, premia, potracenie);
+                    return ObliczUoP(umowa, podstawaPoPotraceniach, premia, potracenie, wyliczoneChorobowe, wyliczonePotracenieZaDni);
 
                 case TypUmowy.UmowaZlecenie:
-                    return ObliczZlecenie(umowa, bazaBrutto, premia, potracenie);
+                    // Zlecenie rzadko ma płatne L4 w ten sposób, ale przekażmy analogicznie
+                    return ObliczZlecenie(umowa, podstawaPoPotraceniach, premia, potracenie);
 
-                case TypUmowy.B2B_Ryczalt:
-                    return ObliczB2B_Ryczalt(umowa, bazaBrutto, premia, potracenie);
-
+                // ... reszta case'ów ...
                 default:
                     return new WynikWyplaty { Brutto = bazaBrutto };
             }
         }
 
-        private WynikWyplaty ObliczUoP(Umowa umowa, decimal wyliczonaPodstawa, decimal premia, decimal potracenie)
+        private WynikWyplaty ObliczUoP(Umowa umowa, decimal wyliczonaPodstawa, decimal premia, decimal komornik, decimal chorobowe, decimal potracenieNieobecnosc)
         {
-            var w = new WynikWyplaty(); 
-            w.Brutto = wyliczonaPodstawa;
+            var w = new WynikWyplaty();
+
+            // Zapisujemy informacje o nieobecnościach do wyniku
+            w.PotracenieZaNieobecnosci = Math.Round(potracenieNieobecnosc, 2);
+            w.WynagrodzenieChorobowe = Math.Round(chorobowe, 2);
+
+            w.Brutto = Math.Round(wyliczonaPodstawa, 2); // To jest kwota pomniejszona o nieobecności
             w.PremiaBrutto = premia;
-            w.PotraceniaKomornicze = potracenie;
+            w.PotraceniaKomornicze = komornik;
 
-            w.CalicowiteBrutto = w.Brutto + w.PremiaBrutto;
+            // Do ZUS wchodzi: Podstawa pomniejszona + Premia
+            // UWAGA: Wynagrodzenie chorobowe NIE jest oskładkowane ZUS-em społecznym!
+            decimal podstawaZusSpoleczny = w.Brutto + w.PremiaBrutto;
 
-            // 1. ZUS (9.76% + 1.5% + 2.45%)
-            w.ZUS_Emerytalne = Math.Round(w.CalicowiteBrutto * 0.0976m, 2);
-            w.ZUS_Rentowe = Math.Round(w.CalicowiteBrutto * 0.0150m, 2);
-            w.ZUS_Chorobowe = Math.Round(w.CalicowiteBrutto * 0.0245m, 2);
+            w.ZUS_Emerytalne = Math.Round(podstawaZusSpoleczny * 0.0976m, 2);
+            w.ZUS_Rentowe = Math.Round(podstawaZusSpoleczny * 0.0150m, 2);
+            w.ZUS_Chorobowe = Math.Round(podstawaZusSpoleczny * 0.0245m, 2);
             w.ZUS_Razem = w.ZUS_Emerytalne + w.ZUS_Rentowe + w.ZUS_Chorobowe;
 
-            // 2. Zdrowotna (9%)
+            // Do Zdrowotnej wchodzi też Chorobowe!
+            w.CalicowiteBrutto = podstawaZusSpoleczny + w.WynagrodzenieChorobowe;
+
             decimal podstawaZdr = w.CalicowiteBrutto - w.ZUS_Razem;
             w.SkladkaZdrowotna = Math.Round(podstawaZdr * 0.09m, 2);
 
-            // 3. Podatek (Koszty + PIT 12% - Ulga)
+            // Podatek
             w.KosztyUzyskania = umowa.CzyKosztyPodwyzszone ? 300m : 250m;
 
+            // Jeśli pracownik był cały miesiąc chory, koszty mogą być proporcjonalnie mniejsze, 
+            // ale zostawmy standardowe dla uproszczenia.
             decimal podstawaPit = w.CalicowiteBrutto - w.ZUS_Razem - w.KosztyUzyskania;
-            w.PodstawaOpodatkowania = Math.Round(podstawaPit, 0); // Podstawa do pełnych złotych
+            w.PodstawaOpodatkowania = Math.Max(0, Math.Round(podstawaPit, 0));
 
             decimal podatekWstepny = w.PodstawaOpodatkowania * 0.12m;
             decimal ulga = umowa.CzyUlgaPodatkowa ? 300m : 0m;
 
-            w.Podatek = podatekWstepny - ulga;
-            if (w.Podatek < 0) w.Podatek = 0;
-            w.Podatek = Math.Round(w.Podatek, 0); // Zaliczka do pełnych złotych
+            w.Podatek = Math.Max(0, Math.Round(podatekWstepny - ulga, 0));
 
-            // 4. Netto
+            // Netto
             w.Netto = w.CalicowiteBrutto - w.ZUS_Razem - w.SkladkaZdrowotna - w.Podatek;
 
-            // FINAŁ: Odejmowanie komornika
+            // Finał
             w.DoWyplaty = w.Netto - w.PotraceniaKomornicze;
 
             return w;

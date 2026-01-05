@@ -8,7 +8,7 @@ namespace SystemKadrowy.Core.Domain
 
         // Relacja: Kogo dotyczy wypłata
         public int PracownikId { get; set; }
-        public Pracownik Pracownik { get; set; }
+        public Pracownik? Pracownik { get; set; }
 
         // Kontekst czasu (za jaki okres)
         public int Rok { get; set; }
@@ -28,6 +28,8 @@ namespace SystemKadrowy.Core.Domain
         public decimal Podatek { get; set; } // Zaliczka PIT
         public decimal KosztyUzyskania { get; set; }
         public decimal PremiaBrutto { get; set; }
+        public decimal WynagrodzenieChorobowe { get; set; } // To jest te 80%
+        public decimal PotracenieZaNieobecnosci { get; set; } // To jest to co odejmujemy z podstawy
         public decimal PotraceniaKomornicze { get; set; }
         public decimal DoWyplaty { get; set; } // To jest najważniejsza kwota teraz
     }

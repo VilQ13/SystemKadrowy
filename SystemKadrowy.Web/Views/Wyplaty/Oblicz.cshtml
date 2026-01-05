@@ -30,13 +30,24 @@
                     </div>
                 </div>
 
-                <div class="col-md-3">
-                    <label class="form-label fw-bold text-primary">Godziny Pracy</label>
-                    <div class="input-group">
-                        <input type="number" step="0.5" name="godziny" class="form-control" value="@ViewBag.WpisaneGodziny" />
-                        <span class="input-group-text">h</span>
+                @if (ViewBag.Pracownik.Umowy[0].SposobWynagradzania.ToString() == "StawkaGodzinowa")
+                {
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold text-primary">Godziny Pracy</label>
+                        <div class="input-group">
+                            <input type="number" step="0.5" name="godziny" class="form-control" value="@ViewBag.WpisaneGodziny" />
+                            <span class="input-group-text">h</span>
+                        </div>
                     </div>
-                </div>
+                }
+                else
+                {
+                    <div class="col-md-3">
+                        <label class="form-label text-muted">Godziny Pracy</label>
+                        <input type="text" class="form-control" value="Etat (Stała pensja)" disabled />
+                        <input type="hidden" name="godziny" value="168" />
+                    </div>
+                }
 
                 <div class="col-md-3">
                     <label class="form-label fw-bold text-danger">Komornik / Potrącenia (Netto)</label>
@@ -91,7 +102,25 @@
                 <p>Podstawa opodatkowania: @Model.PodstawaOpodatkowania.ToString("C")</p>
                 <p class="fw-bold">Zaliczka na PIT: <span class="float-end text-secondary">-@Model.Podatek.ToString("C")</span></p>
                 <p>Podstawa z umowy: @Model.Brutto.ToString("C")</p>
-                <p class="text-success">Premia: +@Model.PremiaBrutto.ToString("C")</p>
+
+                @if (Model.PotracenieZaNieobecnosci > 0)
+                {
+                    <p class="text-danger">
+                        Potrącenie za nieobecności: -@Model.PotracenieZaNieobecnosci.ToString("C")
+                    </p>
+                }
+
+                @if (Model.WynagrodzenieChorobowe > 0)
+                {
+                    <p class="text-info fw-bold">
+                        + Wynagrodzenie Chorobowe (80%): @Model.WynagrodzenieChorobowe.ToString("C")
+                    </p>
+                }
+
+                @if (Model.PremiaBrutto > 0)
+                {
+                    <p class="text-success">Premia: +@Model.PremiaBrutto.ToString("C")</p>
+                }
                 <hr />
                 <p><strong>Całkowite Brutto: @Model.CalicowiteBrutto.ToString("C")</strong></p>
 
