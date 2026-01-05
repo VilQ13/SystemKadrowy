@@ -1,0 +1,89 @@
+﻿@model IEnumerable<SystemKadrowy.Core.Domain.Umowa>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Pracownik)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.TypUmowy)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Stanowisko)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.StawkaBrutto)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.DataRozpoczecia)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.DataZakonczenia)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.CzyKosztyPodwyzszone)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.CzyUlgaPodatkowa)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.CzyStudent)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.CzyDobrowolneChorobowe)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Pracownik.Email)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.TypUmowy)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Stanowisko)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.StawkaBrutto)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.DataRozpoczecia)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.DataZakonczenia)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.CzyKosztyPodwyzszone)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.CzyUlgaPodatkowa)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.CzyStudent)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.CzyDobrowolneChorobowe)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

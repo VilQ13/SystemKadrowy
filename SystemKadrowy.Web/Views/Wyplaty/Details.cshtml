@@ -1,0 +1,54 @@
+﻿@model SystemKadrowy.Core.Domain.Wyplata
+
+@{
+    ViewData["Title"] = "Szczegóły Wypłaty";
+}
+
+<div class="card mt-4 border-success">
+    <div class="card-header bg-success text-white">
+        <div class="d-flex justify-content-between align-items-center">
+            <h3>Zatwierdzony Pasek: @Model.Pracownik.Imie @Model.Pracownik.Nazwisko</h3>
+            <span class="badge bg-light text-success fs-6">Okres: @Model.Miesiac / @Model.Rok</span>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="alert alert-warning">
+            To jest <strong>archiwum</strong>. Tych danych nie można już edytować.
+            Data zatwierdzenia: @Model.DataGenerowania
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <h5>Dane podstawowe</h5>
+                <hr />
+                <p><strong>Brutto:</strong> @Model.Brutto.ToString("C")</p>
+
+                <h5 class="mt-4 text-secondary">Składki ZUS</h5>
+                <hr />
+                <p>Razem ZUS: <span class="float-end text-danger">-@Model.ZUS_Razem.ToString("C")</span></p>
+            </div>
+
+            <div class="col-md-6">
+                <h5 class="text-secondary">Podatki i Zdrowotne</h5>
+                <hr />
+                <p>Składka Zdrowotna: <span class="float-end text-warning">-@Model.SkladkaZdrowotna.ToString("C")</span></p>
+                <p>Koszty Uzyskania: @Model.KosztyUzyskania.ToString("C")</p>
+                <p>Zaliczka PIT: <span class="float-end text-secondary">-@Model.Podatek.ToString("C")</span></p>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="alert alert-success text-center">
+                    <h1>WYPŁACONO: @Model.Netto.ToString("C")</h1>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-3">
+            <a asp-controller="Pracownicy" asp-action="Details" asp-route-id="@Model.PracownikId" class="btn btn-secondary">Wróć do pracownika</a>
+
+            <button class="btn btn-outline-dark" onclick="window.print()">🖨️ Drukuj (Przeglądarka)</button>
+        </div>
+    </div>
+</div>

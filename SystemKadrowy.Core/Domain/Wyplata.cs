@@ -1,0 +1,34 @@
+﻿using System;
+
+namespace SystemKadrowy.Core.Domain
+{
+    public class Wyplata
+    {
+        public int Id { get; set; }
+
+        // Relacja: Kogo dotyczy wypłata
+        public int PracownikId { get; set; }
+        public Pracownik Pracownik { get; set; }
+
+        // Kontekst czasu (za jaki okres)
+        public int Rok { get; set; }
+        public int Miesiac { get; set; }
+        public DateTime DataGenerowania { get; set; } = DateTime.Now;
+
+        // --- WARTOŚCI FINANSOWE (Kopia paska wypłaty) ---
+        // Zapisujemy same liczby, żeby historia była "martwa" (niezmienna)
+        public decimal Brutto { get; set; }
+        public decimal Netto { get; set; }
+
+        public decimal PrzepracowaneGodziny { get; set; }
+
+        // Szczegóły (do raportów)
+        public decimal ZUS_Razem { get; set; }
+        public decimal SkladkaZdrowotna { get; set; }
+        public decimal Podatek { get; set; } // Zaliczka PIT
+        public decimal KosztyUzyskania { get; set; }
+        public decimal PremiaBrutto { get; set; }
+        public decimal PotraceniaKomornicze { get; set; }
+        public decimal DoWyplaty { get; set; } // To jest najważniejsza kwota teraz
+    }
+}
