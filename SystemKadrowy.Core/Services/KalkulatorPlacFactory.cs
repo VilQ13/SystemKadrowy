@@ -12,12 +12,13 @@ namespace SystemKadrowy.Core.Services
     public class KalkulatorPlacService : IKalkulatorPlac
     {
         // Główna metoda
-        public WynikWyplaty Oblicz(
-            Umowa umowa, 
-            decimal premia = 0, 
-            decimal potracenie = 0, 
-            decimal godziny = 168, 
-            List<Nieobecnosc>? nieobecnosci = null
+        public WynikWyplaty Oblicz
+            (
+                Umowa umowa, 
+                decimal premia = 0, 
+                decimal potracenie = 0, 
+                decimal godziny = 168, 
+                List<Nieobecnosc>? nieobecnosci = null
             )
         {
             decimal bazaBrutto = 0;
@@ -40,23 +41,41 @@ namespace SystemKadrowy.Core.Services
 
                     foreach (var n in nieobecnosci)
                     {
-                        // Uproszczenie: Używamy LiczbaDniRoboczych (lub kalendarzowych dla L4 - tu zależy co wpiszesz w formularzu)
-                        int dni = n.LiczbaDniRoboczych;
-
-                        if (n.Typ == TypNieobecnosc.Chorobowe)
+                        // WARIANT A: Nieobecność godzinowa (np. 2h wyjścia prywatnego)
+                        if (n.LiczbaGodzin > 0)
                         {
-                            // Za chorobę zabieramy całą dniówkę...
-                            wyliczonePotracenieZaDni += stawkaDziennia * dni;
+                            // Przyjmujemy standardowy dzielnik 168h (lub wyciągamy wymiar z kalendarza)
+                            // Jeśli chcesz być super dokładny, to powinno być: nominał godzin w TYM miesiącu.
+                            // Dla uproszczenia przyjmijmy średnią 168h.
+                            decimal stawkaZaGodzine = umowa.StawkaBrutto / 168m;
 
-                            // ...ale oddajemy 80% jako wynagrodzenie chorobowe
-                            wyliczoneChorobowe += (stawkaDziennia * 0.8m) * dni;
+                            // Po prostu odejmujemy te pieniądze
+                            wyliczonePotracenieZaDni += stawkaZaGodzine * n.LiczbaGodzin;
+
+                            // Godzinowe wyjścia zazwyczaj nie są płatne jako chorobowe, więc tu kończymy.
                         }
-                        else if (n.Typ == TypNieobecnosc.UrlopBezplatny || n.Typ == TypNieobecnosc.NieobecnoscNieusprawiedliwiona)
+
+                        // WARIANT B: Nieobecność całodzienna (Stary kod)
+                        else
                         {
-                            // Tutaj tylko zabieramy pieniądze, nic nie oddajemy
-                            wyliczonePotracenieZaDni += stawkaDziennia * dni;
+                            // Uproszczenie: Używamy LiczbaDniRoboczych (lub kalendarzowych dla L4 - tu zależy co wpiszesz w formularzu)
+                            int dni = n.LiczbaDniRoboczych;
+
+                            if (n.Typ == TypNieobecnosc.Chorobowe)
+                            {
+                                // Za chorobę zabieramy całą dniówkę...
+                                wyliczonePotracenieZaDni += stawkaDziennia * dni;
+
+                                // ...ale oddajemy 80% jako wynagrodzenie chorobowe
+                                wyliczoneChorobowe += (stawkaDziennia * 0.8m) * dni;
+                            }
+                            else if (n.Typ == TypNieobecnosc.UrlopBezplatny || n.Typ == TypNieobecnosc.NieobecnoscNieusprawiedliwiona)
+                            {
+                                // Tutaj tylko zabieramy pieniądze, nic nie oddajemy
+                                wyliczonePotracenieZaDni += stawkaDziennia * dni;
+                            }
+                            // Urlop Wypoczynkowy (Płatny 100%) - nic nie robimy, bo pensja zostaje taka sama.
                         }
-                        // Urlop Wypoczynkowy (Płatny 100%) - nic nie robimy, bo pensja zostaje taka sama.
                     }
                 }
             }

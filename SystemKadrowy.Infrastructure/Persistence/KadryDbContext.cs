@@ -38,6 +38,14 @@ namespace SystemKadrowy.Infrastructure.Persistence
                 }
             }
 
+            foreach (var property in modelBuilder.Entity<Nieobecnosc>().Metadata.GetProperties())
+            {
+                if (property.ClrType == typeof(decimal) || property.ClrType == typeof(decimal?))
+                {
+                    property.SetColumnType("decimal(18, 2)");
+                }
+            }
+
 
             base.OnModelCreating(modelBuilder);
         }

@@ -23,5 +23,6 @@ namespace SystemKadrowy.Core.Domain
 
         // Pomocnicze: ile to dni roboczych? (Na razie wpiszemy ręcznie, w przyszłości automat)
         public int LiczbaDniRoboczych { get; set; }
+        public decimal LiczbaGodzin { get; set; }
     }
 }
