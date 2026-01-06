@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SystemKadrowy.Core.Domain;
 using SystemKadrowy.Core.Interfaces;
@@ -6,6 +7,7 @@ using SystemKadrowy.Infrastructure.Persistence;
 
 namespace SystemKadrowy.Web.Controllers
 {
+    [Authorize(Roles = "Admin,Place")]
     public class WyplatyController : Controller
     {
         private readonly KadryDbContext _context;

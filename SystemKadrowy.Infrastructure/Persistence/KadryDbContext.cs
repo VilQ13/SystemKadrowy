@@ -5,10 +5,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using SystemKadrowy.Core.Domain;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace SystemKadrowy.Infrastructure.Persistence
 {
-    public class KadryDbContext : DbContext
+    public class KadryDbContext : IdentityDbContext
     {
         public KadryDbContext(DbContextOptions<KadryDbContext> options) : base(options)
         {
@@ -23,6 +24,8 @@ namespace SystemKadrowy.Infrastructure.Persistence
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder);
+
             modelBuilder.Entity<Umowa>()
                 .Property(u => u.StawkaBrutto)
                 .HasColumnType("decimal(18,2)");
@@ -49,7 +52,6 @@ namespace SystemKadrowy.Infrastructure.Persistence
             }
 
 
-            base.OnModelCreating(modelBuilder);
         }
     }
 }

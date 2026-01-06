@@ -91,6 +91,15 @@ namespace SystemKadrowy.Core.Services
                     wynik = ObliczZlecenie(umowa, podstawaPoPotraceniach, premia, potracenie);
                     break;
 
+                //case TypUmowy.UmowaODzielo:
+                //    break;
+
+                //case TypUmowy.B2B_Ryczalt:
+                //    break;
+
+                //case TypUmowy.B2B_Liniowy:
+                //    break;
+
                 // ... reszta case'ów ...
                 default:
                     wynik = new WynikWyplaty { Brutto = bazaBrutto };

@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using System.Globalization;
@@ -14,6 +15,16 @@ namespace SystemKadrowy.Web
             var builder = WebApplication.CreateBuilder(args);
 
             builder.Services.AddDbContext<KadryDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+            builder.Services.AddDefaultIdentity<IdentityUser>(options => {
+                // Opcjonalnie: Konfiguracja hase³ (np. czy musz¹ byæ trudne)
+                options.SignIn.RequireConfirmedAccount = false;
+                options.Password.RequireDigit = false;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequiredLength = 5;
+            })
+            .AddRoles<IdentityRole>() // <--- WA¯NE: W³¹czamy obs³ugê Ról!
+            .AddEntityFrameworkStores<KadryDbContext>();
 
             // Rejestracja serwisu obliczeniowego
             builder.Services.AddScoped<IKalkulatorPlac, KalkulatorPlacService>();
@@ -45,8 +56,10 @@ namespace SystemKadrowy.Web
             }
 
             app.UseHttpsRedirection();
+            app.UseStaticFiles();
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapStaticAssets();
@@ -54,6 +67,14 @@ namespace SystemKadrowy.Web
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}")
                 .WithStaticAssets();
+
+            app.MapRazorPages();
+
+            using (var scope = app.Services.CreateScope())
+            {
+                var services = scope.ServiceProvider;
+                SystemKadrowy.Web.Services.UserSeeder.SeedRolesAndAdminAsync(services).Wait(); ;
+            }
 
             app.Run();
         }
