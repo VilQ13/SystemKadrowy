@@ -15,6 +15,8 @@ namespace SystemKadrowy.Core.Interfaces
         public decimal PremiaBrutto { get; set; } // Dodatek (opodatkowany)
         public decimal WynagrodzenieChorobowe { get; set; }
         public decimal PotracenieZaNieobecnosci { get; set; }
+        public int IleDniNieobecnosci { get; set; }
+        public decimal IleGodzinNieobecnosci { get; set; }
         public decimal CalicowiteBrutto { get; set; } // Podstawa + Premia
         public decimal PotraceniaKomornicze { get; set; } // Odejmowane z ręki
         public decimal DoWyplaty { get; set; } // To co faktycznie idzie przelewem

@@ -30,6 +30,8 @@ namespace SystemKadrowy.Core.Domain
         public decimal PremiaBrutto { get; set; }
         public decimal WynagrodzenieChorobowe { get; set; } // To jest te 80%
         public decimal PotracenieZaNieobecnosci { get; set; } // To jest to co odejmujemy z podstawy
+        public int IleDniNieobecnosci { get; set; }       // Np. 3 dni
+        public decimal IleGodzinNieobecnosci { get; set; } // Np. 2.5 godziny
         public decimal PotraceniaKomornicze { get; set; }
         public decimal DoWyplaty { get; set; } // To jest najważniejsza kwota teraz
     }

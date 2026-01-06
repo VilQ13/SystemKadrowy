@@ -148,6 +148,8 @@ namespace SystemKadrowy.Web.Controllers
 
                 WynagrodzenieChorobowe = wynik.WynagrodzenieChorobowe,
                 PotracenieZaNieobecnosci = wynik.PotracenieZaNieobecnosci,
+                IleDniNieobecnosci = wynik.IleDniNieobecnosci,
+                IleGodzinNieobecnosci = wynik.IleGodzinNieobecnosci
             };
 
             // 5. Zapis do SQL

@@ -12,101 +12,95 @@ namespace SystemKadrowy.Core.Services
     public class KalkulatorPlacService : IKalkulatorPlac
     {
         // Główna metoda
-        public WynikWyplaty Oblicz
-            (
-                Umowa umowa, 
-                decimal premia = 0, 
-                decimal potracenie = 0, 
-                decimal godziny = 168, 
-                List<Nieobecnosc>? nieobecnosci = null
-            )
+        public WynikWyplaty Oblicz(Umowa umowa, decimal premia = 0, decimal potracenie = 0, decimal godziny = 168, List<Nieobecnosc>? nieobecnosci = null)
         {
             decimal bazaBrutto = 0;
 
-            // Zmienne do przechowywania wyników L4/Urlopów
             decimal wyliczoneChorobowe = 0;
             decimal wyliczonePotracenieZaDni = 0;
 
-            // 1. Logika dla STALEJ PENSJI MIESIĘCZNEJ
+            // NOWE ZMIENNE DO ZLICZANIA:
+            int sumaDni = 0;
+            decimal sumaGodzin = 0;
+
             if (umowa.SposobWynagradzania == SposobWynagradzania.StalaMiesieczna)
             {
                 bazaBrutto = umowa.StawkaBrutto;
 
-                // Jeśli są jakieś nieobecności, musimy pomniejszyć pensję
                 if (nieobecnosci != null && nieobecnosci.Any())
                 {
-                    // Zgodnie z prawem, przy stałej pensji, dzielimy zawsze przez 30, 
-                    // aby uzyskać stawkę za 1 dzień nieobecności.
                     decimal stawkaDziennia = umowa.StawkaBrutto / 30m;
 
                     foreach (var n in nieobecnosci)
                     {
-                        // WARIANT A: Nieobecność godzinowa (np. 2h wyjścia prywatnego)
+                        // WARIANT A: Godziny
                         if (n.LiczbaGodzin > 0)
                         {
-                            // Przyjmujemy standardowy dzielnik 168h (lub wyciągamy wymiar z kalendarza)
-                            // Jeśli chcesz być super dokładny, to powinno być: nominał godzin w TYM miesiącu.
-                            // Dla uproszczenia przyjmijmy średnią 168h.
                             decimal stawkaZaGodzine = umowa.StawkaBrutto / 168m;
-
-                            // Po prostu odejmujemy te pieniądze
                             wyliczonePotracenieZaDni += stawkaZaGodzine * n.LiczbaGodzin;
 
-                            // Godzinowe wyjścia zazwyczaj nie są płatne jako chorobowe, więc tu kończymy.
+                            // Zliczamy godziny
+                            sumaGodzin += n.LiczbaGodzin;
                         }
-
-                        // WARIANT B: Nieobecność całodzienna (Stary kod)
+                        // WARIANT B: Dni
                         else
                         {
-                            // Uproszczenie: Używamy LiczbaDniRoboczych (lub kalendarzowych dla L4 - tu zależy co wpiszesz w formularzu)
                             int dni = n.LiczbaDniRoboczych;
+
+                            // Zliczamy dni (Sumujemy wszystko co pomniejsza pensję)
+                            if (n.Typ == TypNieobecnosc.Chorobowe ||
+                                n.Typ == TypNieobecnosc.UrlopBezplatny ||
+                                n.Typ == TypNieobecnosc.NieobecnoscNieusprawiedliwiona)
+                            {
+                                sumaDni += dni;
+                            }
 
                             if (n.Typ == TypNieobecnosc.Chorobowe)
                             {
-                                // Za chorobę zabieramy całą dniówkę...
                                 wyliczonePotracenieZaDni += stawkaDziennia * dni;
-
-                                // ...ale oddajemy 80% jako wynagrodzenie chorobowe
                                 wyliczoneChorobowe += (stawkaDziennia * 0.8m) * dni;
                             }
                             else if (n.Typ == TypNieobecnosc.UrlopBezplatny || n.Typ == TypNieobecnosc.NieobecnoscNieusprawiedliwiona)
                             {
-                                // Tutaj tylko zabieramy pieniądze, nic nie oddajemy
                                 wyliczonePotracenieZaDni += stawkaDziennia * dni;
                             }
-                            // Urlop Wypoczynkowy (Płatny 100%) - nic nie robimy, bo pensja zostaje taka sama.
                         }
                     }
                 }
             }
-            else // STAWKA GODZINOWA
+            else
             {
-                // Przy stawce godzinowej nie bawimy się w potrącenia – po prostu wpisujesz
-                // mniej przepracowanych godzin w parametrze 'godziny'.
                 bazaBrutto = umowa.StawkaBrutto * godziny;
             }
 
-            // 2. Ustalamy "To co zostało z pensji po potrąceniach"
-            // To jest kwota, od której będziemy liczyć ZUS i podatki
-            decimal podstawaPoPotraceniach = bazaBrutto - wyliczonePotracenieZaDni;
+            decimal podstawaPoPotraceniach = Math.Max(0, bazaBrutto - wyliczonePotracenieZaDni);
 
-            // Zabezpieczenie, żeby nie wyszło ujemne brutto
-            if (podstawaPoPotraceniach < 0) podstawaPoPotraceniach = 0;
+            // Przekazujemy sumy do metody szczegółowej (ObliczUoP) lub ustawiamy je po powrocie
+            // Najprościej: Wywołajmy metodę, a potem uzupełnijmy wynik brakującymi polami
 
-            // 3. Przekazujemy dane do szczegółowych kalkulatorów
+            WynikWyplaty wynik;
+
             switch (umowa.TypUmowy)
             {
                 case TypUmowy.UmowaOPrace:
-                    return ObliczUoP(umowa, podstawaPoPotraceniach, premia, potracenie, wyliczoneChorobowe, wyliczonePotracenieZaDni);
+                    wynik = ObliczUoP(umowa, podstawaPoPotraceniach, premia, potracenie, wyliczoneChorobowe, wyliczonePotracenieZaDni);
+                    break;
 
                 case TypUmowy.UmowaZlecenie:
                     // Zlecenie rzadko ma płatne L4 w ten sposób, ale przekażmy analogicznie
-                    return ObliczZlecenie(umowa, podstawaPoPotraceniach, premia, potracenie);
+                    wynik = ObliczZlecenie(umowa, podstawaPoPotraceniach, premia, potracenie);
+                    break;
 
                 // ... reszta case'ów ...
                 default:
-                    return new WynikWyplaty { Brutto = bazaBrutto };
+                    wynik = new WynikWyplaty { Brutto = bazaBrutto };
+                    break;
             }
+
+            wynik.IleDniNieobecnosci = sumaDni;
+            wynik.IleGodzinNieobecnosci = sumaGodzin;
+
+            return wynik;
         }
 
         private WynikWyplaty ObliczUoP(Umowa umowa, decimal wyliczonaPodstawa, decimal premia, decimal komornik, decimal chorobowe, decimal potracenieNieobecnosc)

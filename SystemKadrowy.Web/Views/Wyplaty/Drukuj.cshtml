@@ -85,9 +85,19 @@
                 @if (Model.PotracenieZaNieobecnosci > 0)
                 {
                     <tr>
-                        <td>Potrącenia za nieobecności</td>
+                        <td>
+                            Potrącenia za nieobecności
+                            @if (Model.IleGodzinNieobecnosci > 0)
+                            {
+                                <span class="text-muted small fst-italic ms-2">(Wyjścia pryw.: @Model.IleGodzinNieobecnosci godz.)</span>
+                            }
+                            else if (Model.IleDniNieobecnosci > 0)
+                            {
+                                <span class="text-muted small fst-italic ms-2">(L4 / Bezpłatny: @Model.IleDniNieobecnosci dni)</span>
+                            }
+                        </td>
                         <td class="text-end text-danger">-@Model.PotracenieZaNieobecnosci.ToString("N2") zł</td>
-                        <td>Urlopy bezpłatne / L4</td>
+                        <td>Pomniejszenie podstawy</td>
                     </tr>
                 }
 

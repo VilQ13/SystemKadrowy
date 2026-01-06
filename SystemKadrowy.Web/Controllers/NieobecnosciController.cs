@@ -57,7 +57,7 @@ namespace SystemKadrowy.Web.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,PracownikId,DataOd,DataDo,Typ,LiczbaDniRoboczych")] Nieobecnosc nieobecnosc)
+        public async Task<IActionResult> Create([Bind("Id,PracownikId,DataOd,DataDo,Typ,LiczbaDniRoboczych,LiczbaGodzin")] Nieobecnosc nieobecnosc)
         {
             if (ModelState.IsValid)
             {
@@ -91,7 +91,7 @@ namespace SystemKadrowy.Web.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,PracownikId,DataOd,DataDo,Typ,LiczbaDniRoboczych")] Nieobecnosc nieobecnosc)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,PracownikId,DataOd,DataDo,Typ,LiczbaDniRoboczych,LiczbaGodzin")] Nieobecnosc nieobecnosc)
         {
             if (id != nieobecnosc.Id)
             {
