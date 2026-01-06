@@ -85,6 +85,130 @@
     <a asp-action="Index">Back to List</a>
 </div>
 
+
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const radioData = document.getElementById("trybData");
+            const radioDni = document.getElementById("trybDni");
+            const radioGodziny = document.getElementById("trybGodziny");
+
+            const inputOd = document.getElementById("inputDataOd");
+            const inputDo = document.getElementById("inputDataDo");
+            const inputDni = document.getElementById("inputDni");
+
+            const sekcjaGodzin = document.getElementById("sekcjaGodzin");
+            const inputGodziny = document.getElementById("inputGodziny");
+
+            // --- NOWOŚĆ: Pobieramy wartości początkowe z modelu ---
+            // Musimy wiedzieć, co było zapisane w bazie, żeby ustawić formularz
+            const poczatkowaLiczbaGodzin = parseFloat('@Model.LiczbaGodzin'.replace(',', '.'));
+            // replace naprawia polski format liczb (2,5 -> 2.5) dla JS
+
+            function zmienTryb() {
+                // Reset widoczności
+                sekcjaGodzin.style.display = "none";
+                inputDo.removeAttribute("readonly");
+                inputDni.removeAttribute("readonly");
+                inputDo.style.backgroundColor = "#fff";
+                inputDni.style.backgroundColor = "#fff";
+
+                if (radioData.checked) {
+                    inputDni.setAttribute("readonly", true);
+                    inputDni.style.backgroundColor = "#e9ecef";
+                    // inputGodziny.value = 0; // W Edit nie zerujemy od razu, bo może użytkownik tylko klika
+                    przeliczDniRobocze();
+
+                } else if (radioDni.checked) {
+                    inputDo.setAttribute("readonly", true);
+                    inputDo.style.backgroundColor = "#e9ecef";
+                    // inputGodziny.value = 0;
+                    wyliczDateKocowa();
+
+                } else if (radioGodziny.checked) {
+                    sekcjaGodzin.style.display = "block";
+
+                    inputDo.setAttribute("readonly", true);
+                    inputDo.style.backgroundColor = "#e9ecef";
+                    // Jeśli data DO jest pusta, ustaw taką samą jak OD
+                    if(!inputDo.value) inputDo.value = inputOd.value;
+
+                    inputDni.setAttribute("readonly", true);
+                    inputDni.style.backgroundColor = "#e9ecef";
+                    inputDni.value = 0;
+                }
+            }
+
+            // --- Funkcje obliczeniowe (Kopia z Create) ---
+
+            function przeliczDniRobocze() {
+                if (!inputOd.value || !inputDo.value) return;
+                const start = new Date(inputOd.value);
+                const end = new Date(inputDo.value);
+                if (end < start) { inputDni.value = 0; return; }
+
+                let count = 0;
+                let current = new Date(start);
+                while (current <= end) {
+                    const dayOfWeek = current.getDay();
+                    if (dayOfWeek !== 0 && dayOfWeek !== 6) count++;
+                    current.setDate(current.getDate() + 1);
+                }
+                inputDni.value = count;
+            }
+
+            function wyliczDateKocowa() {
+                if (!inputOd.value || !inputDni.value) return;
+                let daysToAdd = parseInt(inputDni.value);
+                if (daysToAdd <= 0) return;
+
+                let current = new Date(inputOd.value);
+                let addedDays = 0;
+                let startDay = current.getDay();
+                if (startDay !== 0 && startDay !== 6) addedDays = 1;
+
+                while (addedDays < daysToAdd) {
+                    current.setDate(current.getDate() + 1);
+                    const dayOfWeek = current.getDay();
+                    if (dayOfWeek !== 0 && dayOfWeek !== 6) addedDays++;
+                }
+
+                const yyyy = current.getFullYear();
+                const mm = String(current.getMonth() + 1).padStart(2, '0');
+                const dd = String(current.getDate()).padStart(2, '0');
+                inputDo.value = `${yyyy}-${mm}-${dd}`;
+            }
+
+            // --- LISTENERY ---
+            radioData.addEventListener("change", zmienTryb);
+            radioDni.addEventListener("change", zmienTryb);
+            radioGodziny.addEventListener("change", zmienTryb);
+
+            inputOd.addEventListener("change", function() {
+                if (radioGodziny.checked) inputDo.value = inputOd.value;
+                else if (radioData.checked) przeliczDniRobocze();
+                else wyliczDateKocowa();
+            });
+
+            inputDo.addEventListener("change", przeliczDniRobocze);
+            inputDni.addEventListener("input", wyliczDateKocowa);
+
+            // --- INICJALIZACJA STANU (Tylko w Edit) ---
+            // Sprawdzamy co mamy w bazie i zaznaczamy odpowiednie kółeczko
+            if (poczatkowaLiczbaGodzin > 0) {
+                // To była nieobecność godzinowa
+                radioGodziny.checked = true;
+            } else {
+                // To była nieobecność dniowa
+                radioData.checked = true;
+            }
+
+            // Uruchom funkcję raz na starcie, żeby poukrywać/zablokować pola
+            zmienTryb();
+        });
+    </script>
 }
