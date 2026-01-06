@@ -13,10 +13,12 @@ namespace SystemKadrowy.Web.Controllers
     public class PracownicyController : Controller
     {
         private readonly KadryDbContext _context;
+        private readonly IWebHostEnvironment _hostEnvironment;
 
-        public PracownicyController(KadryDbContext context)
+        public PracownicyController(KadryDbContext context, IWebHostEnvironment hostEnvironment)
         {
             _context = context;
+            _hostEnvironment = hostEnvironment;
         }
 
         // GET: Pracownicy
@@ -59,7 +61,7 @@ namespace SystemKadrowy.Web.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Imie,Nazwisko,PESEL,DataUrodzenia,Email,Telefon,NumerKontaBankowego,ZdjecieSciezka,AdresId,AdresZamieszkania")] Pracownik pracownik)
+        public async Task<IActionResult> Create([Bind("Id,Imie,Nazwisko,PESEL,DataUrodzenia,Email,Telefon,NumerKontaBankowego,ZdjecieSciezka,AdresId,AdresZamieszkania")] Pracownik pracownik, IFormFile? plikZdjecia)
         {
             if (pracownik.AdresZamieszkania != null && pracownik.AdresZamieszkania.KodPocztowy != null)
             {
@@ -81,6 +83,31 @@ namespace SystemKadrowy.Web.Controllers
 
             if (ModelState.IsValid)
             {
+                // --- LOGIKA ZAPISU ZDJĘCIA ---
+                if (plikZdjecia != null)
+                {
+                    // 1. Gdzie zapisać? (Folder wwwroot/zdjecia)
+                    string folderZdjec = Path.Combine(_hostEnvironment.WebRootPath, "zdjecia");
+
+                    // Upewnij się, że folder istnieje
+                    if (!Directory.Exists(folderZdjec)) Directory.CreateDirectory(folderZdjec);
+
+                    // 2. Unikalna nazwa pliku (żeby dwa pliki 'profilowe.jpg' się nie nadpisały)
+                    // Tworzymy np. "profilowe_GUID.jpg"
+                    string unikalnaNazwa = Guid.NewGuid().ToString() + "_" + plikZdjecia.FileName;
+                    string sciezkaPliku = Path.Combine(folderZdjec, unikalnaNazwa);
+
+                    // 3. Fizyczny zapis na dysk
+                    using (var fileStream = new FileStream(sciezkaPliku, FileMode.Create))
+                    {
+                        await plikZdjecia.CopyToAsync(fileStream);
+                    }
+
+                    // 4. Zapisanie ścieżki w bazie (tylko nazwa pliku)
+                    pracownik.ZdjecieSciezka = unikalnaNazwa;
+                }
+                // -----------------------------
+
                 _context.Add(pracownik);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
@@ -96,7 +123,10 @@ namespace SystemKadrowy.Web.Controllers
                 return NotFound();
             }
 
-            var pracownik = await _context.Pracownicy.FindAsync(id);
+            var pracownik = await _context.Pracownicy
+                .Include(p => p.AdresZamieszkania)      // Pobierz adres
+                .ThenInclude(a => a.KodPocztowy)
+                .FirstOrDefaultAsync(m => m.Id == id);
             if (pracownik == null)
             {
                 return NotFound();
@@ -109,7 +139,7 @@ namespace SystemKadrowy.Web.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Imie,Nazwisko,PESEL,DataUrodzenia,Email,Telefon,NumerKontaBankowego,ZdjecieSciezka,AdresId,AdresZamieszkania")] Pracownik pracownik)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Imie,Nazwisko,PESEL,DataUrodzenia,Email,Telefon,NumerKontaBankowego,ZdjecieSciezka,AdresId,AdresZamieszkania")] Pracownik pracownik, IFormFile? plikZdjecia)
         {
             if (id != pracownik.Id)
             {
@@ -136,6 +166,35 @@ namespace SystemKadrowy.Web.Controllers
 
             if (ModelState.IsValid)
             {
+                // --- LOGIKA ZAPISU ZDJĘCIA ---
+                if (plikZdjecia != null)
+                {
+                    // 1. Gdzie zapisać? (Folder wwwroot/zdjecia)
+                    string folderZdjec = Path.Combine(_hostEnvironment.WebRootPath, "zdjecia");
+
+                    // Upewnij się, że folder istnieje
+                    if (!Directory.Exists(folderZdjec)) Directory.CreateDirectory(folderZdjec);
+
+                    // 2. Unikalna nazwa pliku (żeby dwa pliki 'profilowe.jpg' się nie nadpisały)
+                    // Tworzymy np. "profilowe_GUID.jpg"
+                    string unikalnaNazwa = Guid.NewGuid().ToString() + "_" + plikZdjecia.FileName;
+                    string sciezkaPliku = Path.Combine(folderZdjec, unikalnaNazwa);
+
+                    // 3. Fizyczny zapis na dysk
+                    using (var fileStream = new FileStream(sciezkaPliku, FileMode.Create))
+                    {
+                        await plikZdjecia.CopyToAsync(fileStream);
+                    }
+
+                    // 4. Zapisanie ścieżki w bazie (tylko nazwa pliku)
+                    pracownik.ZdjecieSciezka = unikalnaNazwa;
+                }
+                else
+                {
+
+                }
+                    // -----------------------------
+
                 try
                 {
                     _context.Update(pracownik);

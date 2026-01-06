@@ -10,9 +10,24 @@
 <hr />
 <div class="row">
     <div class="col-md-4">
-        <form asp-action="Edit">
+        <form asp-action="Edit" enctype="multipart/form-data">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="ZdjecieSciezka" />
+            <input type="hidden" asp-for="AdresZamieszkania.Id" />
+            <div class="col-md-6 mb-3">
+                <label class="control-label fw-bold">Zdjęcie profilowe</label>
+
+                @if (!string.IsNullOrEmpty(Model.ZdjecieSciezka))
+                {
+                    <div class="mb-2">
+                        <img src="~/zdjecia/@Model.ZdjecieSciezka" style="max-width: 150px; border-radius: 5px;" />
+                    </div>
+                }
+
+                <input type="file" name="plikZdjecia" class="form-control" accept=".jpg,.jpeg,.png" />
+                <small class="text-muted">Pozostaw puste, aby zachować obecne zdjęcie.</small>
+            </div>
             <div class="form-group">
                 <label asp-for="Imie" class="control-label"></label>
                 <input asp-for="Imie" class="form-control" />
@@ -30,7 +45,7 @@
             </div>
             <div class="form-group">
                 <label asp-for="DataUrodzenia" class="control-label"></label>
-                <input asp-for="DataUrodzenia" type="date" class="form-control" />
+                <input asp-for="DataUrodzenia" type="date" class="form-control" asp-format="{0:yyyy-MM-dd}" />
                 <span asp-validation-for="DataUrodzenia" class="text-danger"></span>
             </div>
             <div class="form-group">
