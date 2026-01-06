@@ -38,6 +38,61 @@
                 <input asp-for="Email" class="form-control" />
                 <span asp-validation-for="Email" class="text-danger"></span>
             </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <h4>Dane podstawowe</h4>
+                    <div class="form-group mb-3">
+                        <label asp-for="Telefon" class="control-label"></label>
+                        <input asp-for="Telefon" class="form-control" />
+                    </div>
+                    <div class="form-group mb-3">
+                        <label asp-for="NumerKontaBankowego" class="control-label">Nr Konta Bankowego</label>
+                        <input asp-for="NumerKontaBankowego" class="form-control" />
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <h4 class="text-primary">Adres Zamieszkania</h4>
+                    <div class="card p-3 bg-light">
+
+                        <div class="row">
+                            <div class="col-4">
+                                <div class="form-group mb-3">
+                                    <label class="control-label">Kod</label>
+                                    <input asp-for="AdresZamieszkania.KodPocztowy.Kod" class="form-control" placeholder="00-000" />
+                                </div>
+                            </div>
+                            <div class="col-8">
+                                <div class="form-group mb-3">
+                                    <label class="control-label">Miejscowość</label>
+                                    <input asp-for="AdresZamieszkania.KodPocztowy.Miejscowosc" class="form-control" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label asp-for="AdresZamieszkania.Ulica" class="control-label">Ulica</label>
+                            <input asp-for="AdresZamieszkania.Ulica" class="form-control" />
+                        </div>
+
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="form-group mb-3">
+                                    <label asp-for="AdresZamieszkania.NumerDomu" class="control-label">Nr Domu</label>
+                                    <input asp-for="AdresZamieszkania.NumerDomu" class="form-control" />
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="form-group mb-3">
+                                    <label asp-for="AdresZamieszkania.NumerLokalu" class="control-label">Nr Lokalu</label>
+                                    <input asp-for="AdresZamieszkania.NumerLokalu" class="form-control" />
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
             <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-primary" />
             </div>

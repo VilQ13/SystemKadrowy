@@ -33,6 +33,8 @@ namespace SystemKadrowy.Web.Controllers
             var pracownik = await _context.Pracownicy
                 .Include(p => p.Umowy)   // Warto widzieć też umowy
                 .Include(p => p.Wyplaty) // <--- DODAJ TO (Ładujemy historię)
+                .Include(p => p.AdresZamieszkania)
+                .ThenInclude(a => a.KodPocztowy)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (pracownik == null) return NotFound();
@@ -57,8 +59,26 @@ namespace SystemKadrowy.Web.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Imie,Nazwisko,PESEL,DataUrodzenia,Email")] Pracownik pracownik)
+        public async Task<IActionResult> Create([Bind("Id,Imie,Nazwisko,PESEL,DataUrodzenia,Email,Telefon,NumerKontaBankowego,ZdjecieSciezka,AdresId,AdresZamieszkania")] Pracownik pracownik)
         {
+            if (pracownik.AdresZamieszkania != null && pracownik.AdresZamieszkania.KodPocztowy != null)
+            {
+                string wpisanyKod = pracownik.AdresZamieszkania.KodPocztowy.Kod;
+                string wpisanaMiejscowosc = pracownik.AdresZamieszkania.KodPocztowy.Miejscowosc;
+
+                // Sprawdzamy, czy taki kod już istnieje w bazie
+                var istniejacyKod = await _context.KodyPocztowe
+                    .FirstOrDefaultAsync(k => k.Kod == wpisanyKod && k.Miejscowosc == wpisanaMiejscowosc);
+
+                if (istniejacyKod != null)
+                {
+                    // Jeśli istnieje, używamy jego ID i nie tworzymy nowego
+                    pracownik.AdresZamieszkania.KodPocztowy = null; // Czyścimy obiekt, żeby EF nie próbował go dodać
+                    pracownik.AdresZamieszkania.KodPocztowyId = istniejacyKod.Id;
+                }
+                // Jeśli nie istnieje (istniejacyKod == null), EF sam go utworzy dzięki relacjom.
+            }
+
             if (ModelState.IsValid)
             {
                 _context.Add(pracownik);
@@ -89,11 +109,29 @@ namespace SystemKadrowy.Web.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Imie,Nazwisko,PESEL,DataUrodzenia,Email")] Pracownik pracownik)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Imie,Nazwisko,PESEL,DataUrodzenia,Email,Telefon,NumerKontaBankowego,ZdjecieSciezka,AdresId,AdresZamieszkania")] Pracownik pracownik)
         {
             if (id != pracownik.Id)
             {
                 return NotFound();
+            }
+
+            if (pracownik.AdresZamieszkania != null && pracownik.AdresZamieszkania.KodPocztowy != null)
+            {
+                string wpisanyKod = pracownik.AdresZamieszkania.KodPocztowy.Kod;
+                string wpisanaMiejscowosc = pracownik.AdresZamieszkania.KodPocztowy.Miejscowosc;
+
+                // Sprawdzamy, czy taki kod już istnieje w bazie
+                var istniejacyKod = await _context.KodyPocztowe
+                    .FirstOrDefaultAsync(k => k.Kod == wpisanyKod && k.Miejscowosc == wpisanaMiejscowosc);
+
+                if (istniejacyKod != null)
+                {
+                    // Jeśli istnieje, używamy jego ID i nie tworzymy nowego
+                    pracownik.AdresZamieszkania.KodPocztowy = null; // Czyścimy obiekt, żeby EF nie próbował go dodać
+                    pracownik.AdresZamieszkania.KodPocztowyId = istniejacyKod.Id;
+                }
+                // Jeśli nie istnieje (istniejacyKod == null), EF sam go utworzy dzięki relacjom.
             }
 
             if (ModelState.IsValid)

@@ -41,6 +41,33 @@
             @Html.DisplayFor(model => model.Email)
         </dd>
     </dl>
+    <dl class="row">
+        <dt class="col-sm-3">Adres:</dt>
+        <dd class="col-sm-9">
+            @if (Model.AdresZamieszkania != null)
+            {
+                <span>
+                    ul. @Model.AdresZamieszkania.Ulica @Model.AdresZamieszkania.NumerDomu
+                    @(Model.AdresZamieszkania.NumerLokalu != null ? "/" + Model.AdresZamieszkania.NumerLokalu : "")
+                </span>
+
+                <br />
+                <span>
+                    @Model.AdresZamieszkania.KodPocztowy.Kod @Model.AdresZamieszkania.KodPocztowy.Miejscowosc
+                </span>
+            }
+            else
+            {
+                <span class="text-muted text-italic">Brak adresu</span>
+            }
+        </dd>
+
+        <dt class="col-sm-3">Telefon:</dt>
+        <dd class="col-sm-9">@Model.Telefon</dd>
+
+        <dt class="col-sm-3">Konto Bankowe:</dt>
+        <dd class="col-sm-9">@Model.NumerKontaBankowego</dd>
+    </dl>
 </div>
 <hr />
 <h3>Historia Wypłat</h3>

@@ -18,6 +18,8 @@ namespace SystemKadrowy.Infrastructure.Persistence
         public DbSet<Umowa> Umowy { get; set; }
         public DbSet<Wyplata> Wyplaty { get; set; }
         public DbSet<Nieobecnosc> Nieobecnosci { get; set; }
+        public DbSet<Adres> Adresy { get; set; }
+        public DbSet<KodPocztowy> KodyPocztowe { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
