@@ -23,18 +23,29 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-controller="Pracownicy" asp-action="Index">Pracownicy</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-controller="Umowy" asp-action="Index">Umowy</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-controller="Wyplaty" asp-action="Index">Lista Płac</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-controller="Nieobecnosci" asp-action="Index">Nieobecnosci</a>
-                        </li>
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-danger fw-bold" asp-controller="Uzytkownicy" asp-action="Index">ADMIN: Użytkownicy</a>
+                            </li>
+                        }
+
+                        @if (User.IsInRole("Admin") || User.IsInRole("Kadry"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Pracownicy" asp-action="Index">Pracownicy</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Nieobecnosci" asp-action="Index">Nieobecności</a>
+                            </li>
+                        }
+
+                        @if (User.IsInRole("Admin") || User.IsInRole("Place"))
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="Wyplaty" asp-action="Index">Wypłaty</a>
+                            </li>
+                        }
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>
@@ -42,6 +53,7 @@
                     </ul>
                     <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                         <ul class="navbar-nav flex-grow-1">
+
                         </ul>
 
                         <partial name="_LoginPartial" />
