@@ -2,45 +2,55 @@
 
 @{
     ViewData["Title"] = "Lista Płac";
-    // Domyślnie ustawiamy bieżący miesiąc w formacie YYYY-MM
     var obecnyMiesiac = DateTime.Now.ToString("yyyy-MM");
 }
 
 <h1>Generowanie Listy Płac</h1>
 
-<div class="card mb-4">
+
+<div class="card mb-4 border-primary">
+    <div class="card-header bg-primary text-white">
+        Ustawienia Generatora
+    </div>
     <div class="card-body bg-light">
         <div class="row align-items-center">
             <div class="col-auto">
                 <label for="okres" class="col-form-label fw-bold">Wybierz okres rozliczeniowy:</label>
             </div>
             <div class="col-auto">
-                <input type="month" id="okres" name="okres" class="form-control" value="@obecnyMiesiac" onchange="zaktualizujLinki()" />
+                <input type="month" id="okres" name="okres" class="form-control fw-bold text-primary" value="@obecnyMiesiac" onchange="zaktualizujLinki()" />
             </div>
             <div class="col-auto">
-                <small class="text-muted">Zmiana daty automatycznie zaktualizuje przyciski poniżej.</small>
+                <small class="text-muted">Zmiana daty automatycznie zaktualizuje linki "Oblicz" poniżej.</small>
+            </div>
+            <div class ="col-auto">
+                <a asp-action="EksportExcel" class="btn btn-success ms-2">📥 Pobierz Raport (Excel)</a>
             </div>
         </div>
     </div>
 </div>
 
-<table class="table table-hover">
-    <thead>
+<table class="table table-hover table-striped">
+    <thead class="table-dark">
         <tr>
             <th>Imię i Nazwisko</th>
             <th>PESEL</th>
-            <th>Akcja</th>
+            <th class="text-end">Akcja</th>
         </tr>
     </thead>
     <tbody>
         @foreach (var item in Model)
         {
             <tr>
-                <td>@item.Imie @item.Nazwisko</td>
-                <td>@item.PESEL</td>
-                <td>
-                    <a href="#" data-id="@item.Id" class="btn-oblicz btn btn-success btn-sm">
-                        Oblicz Wypłatę
+                <td class="align-middle">
+                    <strong>@item.Imie @item.Nazwisko</strong>
+                    <br />
+                    <small class="text-muted">@item.Email</small>
+                </td>
+                <td class="align-middle">@item.PESEL</td>
+                <td class="text-end">
+                    <a href="#" data-id="@item.Id" class="btn-oblicz btn btn-outline-success btn-sm">
+                        💰 Oblicz Wypłatę
                     </a>
                 </td>
             </tr>
@@ -51,28 +61,21 @@
 @section Scripts {
     <script>
         function zaktualizujLinki() {
-            // 1. Pobierz wartość z kalendarza (np. "2025-05")
             var dataInput = document.getElementById('okres').value;
-            var czesci = dataInput.split('-'); // Dzielimy na ["2025", "05"]
+            var czesci = dataInput.split('-');
             var rok = czesci[0];
             var miesiac = czesci[1];
 
-            // 2. Znajdź wszystkie przyciski "Oblicz"
             var przyciski = document.getElementsByClassName('btn-oblicz');
 
-            // 3. Dla każdego przycisku ustaw nowy link
             for (var i = 0; i < przyciski.length; i++) {
                 var btn = przyciski[i];
                 var idPracownika = btn.getAttribute('data-id');
-
-                // Budujemy URL: /Wyplaty/Oblicz/5?rok=2025&miesiac=05
                 var nowyLink = '/Wyplaty/Oblicz/' + idPracownika + '?rok=' + rok + '&miesiac=' + miesiac;
-
                 btn.href = nowyLink;
             }
         }
 
-        // Uruchom funkcję raz na starcie, żeby linki działały od razu
         document.addEventListener("DOMContentLoaded", function() {
             zaktualizujLinki();
         });

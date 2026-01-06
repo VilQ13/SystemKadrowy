@@ -4,6 +4,8 @@ using Microsoft.EntityFrameworkCore;
 using SystemKadrowy.Core.Domain;
 using SystemKadrowy.Core.Interfaces;
 using SystemKadrowy.Infrastructure.Persistence;
+using ClosedXML.Excel;
+using System.IO;
 
 namespace SystemKadrowy.Web.Controllers
 {
@@ -184,6 +186,73 @@ namespace SystemKadrowy.Web.Controllers
             if (wyplata == null) return NotFound();
 
             return View(wyplata);
+        }
+
+        // GET: Wyplaty/EksportExcel
+        [Authorize(Roles = "Admin,Place")] // Tylko uprawnieni mogą pobierać
+        public async Task<IActionResult> EksportExcel()
+        {
+            // 1. Pobierz dane z bazy
+            var wyplaty = await _context.Wyplaty
+                .Include(w => w.Pracownik)
+                .OrderByDescending(w => w.DataGenerowania)
+                .ToListAsync();
+
+            // 2. Stwórz wirtualny plik Excela
+            using (var workbook = new XLWorkbook())
+            {
+                var worksheet = workbook.Worksheets.Add("Lista Płac");
+
+                // 3. Nagłówki tabeli
+                worksheet.Cell(1, 1).Value = "Imię i Nazwisko";
+                worksheet.Cell(1, 2).Value = "Data Wypłaty";
+                worksheet.Cell(1, 3).Value = "Brutto";
+                worksheet.Cell(1, 4).Value = "Netto";
+                worksheet.Cell(1, 5).Value = "Koszt Pracodawcy";
+                worksheet.Cell(1, 6).Value = "Numer Konta";
+
+                // Stylizacja nagłówka (pogrubienie + tło)
+                var naglowek = worksheet.Range("A1:F1");
+                naglowek.Style.Font.Bold = true;
+                naglowek.Style.Fill.BackgroundColor = XLColor.LightGray;
+
+                // 4. Wypełnianie danych (wiersz po wierszu)
+                int row = 2;
+                foreach (var w in wyplaty)
+                {
+                    worksheet.Cell(row, 1).Value = w.Pracownik.Imie + " " + w.Pracownik.Nazwisko;
+                    worksheet.Cell(row, 2).Value = w.DataGenerowania;
+
+                    worksheet.Cell(row, 3).Value = w.Brutto;
+                    worksheet.Cell(row, 3).Style.NumberFormat.Format = "#,##0.00 zł"; // Format walutowy
+
+                    worksheet.Cell(row, 4).Value = w.Netto;
+                    worksheet.Cell(row, 4).Style.NumberFormat.Format = "#,##0.00 zł";
+
+                    worksheet.Cell(row, 5).Value = w.DoWyplaty;
+                    worksheet.Cell(row, 5).Style.NumberFormat.Format = "#,##0.00 zł";
+
+                    worksheet.Cell(row, 6).Value = w.Pracownik.NumerKontaBankowego ?? "Brak danych"; // Zabezpieczenie przed nullem
+
+                    row++;
+                }
+
+                // 5. Dopasuj szerokość kolumn do treści
+                worksheet.Columns().AdjustToContents();
+
+                // 6. Zamień obiekt Excela na strumień bajtów (plik)
+                using (var stream = new MemoryStream())
+                {
+                    workbook.SaveAs(stream);
+                    var content = stream.ToArray();
+
+                    return File(
+                        content,
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                        $"ListaPlac_{DateTime.Now:yyyyMMdd}.xlsx"
+                    );
+                }
+            }
         }
     }
 }
