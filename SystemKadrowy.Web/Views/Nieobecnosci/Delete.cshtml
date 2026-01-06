@@ -35,17 +35,35 @@
         <dd class = "col-sm-10">
             @Html.DisplayFor(model => model.Typ)
         </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.LiczbaDniRoboczych)
+        <dt class="col-sm-2">
+            Wymiar czasu
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.LiczbaDniRoboczych)
+        <dd class="col-sm-10">
+            @if (Model.LiczbaGodzin > 0)
+            {
+                <span class="fs-5 fw-bold text-primary">@Model.LiczbaGodzin.ToString("0.##") godz.</span>
+                <br />
+                <small class="text-muted">(Nieobecność godzinowa - część dnia)</small>
+            }
+            else
+            {
+                <span class="fs-5 fw-bold">@Model.LiczbaDniRoboczych dni</span>
+                <br />
+                <small class="text-muted">(Nieobecność całodzienna)</small>
+            }
         </dd>
     </dl>
-    
+
     <form asp-action="Delete">
         <input type="hidden" asp-for="Id" />
         <input type="submit" value="Delete" class="btn btn-danger" /> |
-        <a asp-action="Index">Back to List</a>
+        @if (Context.Request.Headers["X-Requested-With"] != "XMLHttpRequest")
+        {
+            <a asp-action="Index">Back to List</a>
+        }
+        else
+        {
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anuluj</button>
+        }
     </form>
 </div>

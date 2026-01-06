@@ -42,6 +42,13 @@ namespace SystemKadrowy.Web.Controllers
                 return NotFound();
             }
 
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                // Zwracamy PartialView -> System wie, żeby NIE dodawać _Layout (menu, stopki)
+                // Dzięki temu do okienka trafi sam czysty tekst szczegółów.
+                return PartialView(nieobecnosc);
+            }
+
             return View(nieobecnosc);
         }
 
@@ -136,6 +143,11 @@ namespace SystemKadrowy.Web.Controllers
             if (nieobecnosc == null)
             {
                 return NotFound();
+            }
+
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                return PartialView(nieobecnosc);
             }
 
             return View(nieobecnosc);

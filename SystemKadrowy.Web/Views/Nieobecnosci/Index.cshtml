@@ -50,10 +50,75 @@
             </td>
             <td>
                 <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                    <button class="btn btn-info btn-sm text-white btn-modal-action"
+                            data-url="@Url.Action("Details", new { id = item.Id })"
+                            data-title="Szczegóły Nieobecności">
+                        👁️ Podgląd
+                    </button>
+
+                    <button class="btn btn-danger btn-sm btn-modal-action"
+                            data-url="@Url.Action("Delete", new { id = item.Id })"
+                            data-title="Potwierdź Usunięcie">
+                        🗑️ Usuń
+                    </button>
+                @* <a asp-action="Details" asp-route-id="@item.Id">Details</a> | *@
+                @* <a asp-action="Delete" asp-route-id="@item.Id">Delete</a> *@
             </td>
         </tr>
 }
     </tbody>
 </table>
+
+<div class="modal fade" id="modalUniwersalny" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title" id="modalTytul">Akcja</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="modalTresc">
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Jeden handler dla WSZYSTKICH przycisków z klasą 'btn-modal-action'
+            $(".btn-modal-action").click(function () {
+
+                var btn = $(this); // Guzik, który kliknięto
+                var url = btn.data("url");      // Pobierz adres z atrybutu data-url
+                var tytul = btn.data("title");  // Pobierz tytuł z atrybutu data-title
+
+                // Referencje do okna
+                var modalElement = document.getElementById('modalUniwersalny');
+                var modalBody = $("#modalTresc");
+                var modalTitle = $("#modalTytul");
+                var myModal = new bootstrap.Modal(modalElement);
+
+                // Ustawiamy tytuł okna
+                modalTitle.text(tytul);
+
+                // Czyścimy treść i pokazujemy spinner
+                modalBody.html('<div class="text-center p-4"><div class="spinner-border text-primary"></div></div>');
+
+                // Otwieramy
+                myModal.show();
+
+                // Pobieramy treść (AJAX)
+                $.ajax({
+                    url: url,
+                    type: "GET",
+                    success: function (response) {
+                        modalBody.html(response);
+                    },
+                    error: function () {
+                        modalBody.html('<p class="text-danger">Błąd ładowania.</p>');
+                    }
+                });
+            });
+        });
+    </script>
+}
