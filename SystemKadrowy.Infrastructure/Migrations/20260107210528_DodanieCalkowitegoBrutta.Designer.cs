@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SystemKadrowy.Infrastructure.Persistence;
 
@@ -11,9 +12,11 @@ using SystemKadrowy.Infrastructure.Persistence;
 namespace SystemKadrowy.Infrastructure.Migrations
 {
     [DbContext(typeof(KadryDbContext))]
-    partial class KadryDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260107210528_DodanieCalkowitegoBrutta")]
+    partial class DodanieCalkowitegoBrutta
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -250,7 +253,7 @@ namespace SystemKadrowy.Infrastructure.Migrations
 
                     b.HasIndex("KodPocztowyId");
 
-                    b.ToTable("Adresy", (string)null);
+                    b.ToTable("Adresy");
                 });
 
             modelBuilder.Entity("SystemKadrowy.Core.Domain.KodPocztowy", b =>
@@ -271,7 +274,7 @@ namespace SystemKadrowy.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("KodyPocztowe", (string)null);
+                    b.ToTable("KodyPocztowe");
                 });
 
             modelBuilder.Entity("SystemKadrowy.Core.Domain.Nieobecnosc", b =>
@@ -304,7 +307,7 @@ namespace SystemKadrowy.Infrastructure.Migrations
 
                     b.HasIndex("PracownikId");
 
-                    b.ToTable("Nieobecnosci", (string)null);
+                    b.ToTable("Nieobecnosci");
                 });
 
             modelBuilder.Entity("SystemKadrowy.Core.Domain.Pracownik", b =>
@@ -350,7 +353,7 @@ namespace SystemKadrowy.Infrastructure.Migrations
 
                     b.HasIndex("AdresId");
 
-                    b.ToTable("Pracownicy", (string)null);
+                    b.ToTable("Pracownicy");
                 });
 
             modelBuilder.Entity("SystemKadrowy.Core.Domain.Umowa", b =>
@@ -399,7 +402,7 @@ namespace SystemKadrowy.Infrastructure.Migrations
 
                     b.HasIndex("PracownikId");
 
-                    b.ToTable("Umowy", (string)null);
+                    b.ToTable("Umowy");
                 });
 
             modelBuilder.Entity("SystemKadrowy.Core.Domain.Wyplata", b =>
@@ -471,7 +474,7 @@ namespace SystemKadrowy.Infrastructure.Migrations
 
                     b.HasIndex("PracownikId");
 
-                    b.ToTable("Wyplaty", (string)null);
+                    b.ToTable("Wyplaty");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

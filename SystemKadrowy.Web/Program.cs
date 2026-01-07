@@ -6,6 +6,7 @@ using SystemKadrowy.Core.Interfaces;
 using SystemKadrowy.Core.Services;
 using SystemKadrowy.Infrastructure.Persistence;
 using SystemKadrowy.Web.Filters;
+using QuestPDF.Infrastructure;
 
 namespace SystemKadrowy.Web
 {
@@ -18,13 +19,12 @@ namespace SystemKadrowy.Web
             builder.Services.AddDbContext<KadryDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
             builder.Services.AddDefaultIdentity<IdentityUser>(options => {
-                // Opcjonalnie: Konfiguracja hase³ (np. czy musz¹ byæ trudne)
                 options.SignIn.RequireConfirmedAccount = false;
                 options.Password.RequireDigit = false;
                 options.Password.RequireNonAlphanumeric = false;
                 options.Password.RequiredLength = 5;
             })
-            .AddRoles<IdentityRole>() // <--- WA¯NE: W³¹czamy obs³ugê Ról!
+            .AddRoles<IdentityRole>()
             .AddEntityFrameworkStores<KadryDbContext>();
 
             // Rejestracja serwisu obliczeniowego
@@ -35,6 +35,8 @@ namespace SystemKadrowy.Web
             {
                 options.Filters.Add<ZmianaHaslaFilter>();
             });
+
+            QuestPDF.Settings.License = LicenseType.Community;
 
             var app = builder.Build();
 

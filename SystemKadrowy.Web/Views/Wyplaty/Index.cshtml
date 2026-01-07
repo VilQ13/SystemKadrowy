@@ -23,8 +23,14 @@
             <div class="col-auto">
                 <small class="text-muted">Zmiana daty automatycznie zaktualizuje linki "Oblicz" poniżej.</small>
             </div>
-            <div class ="col-auto">
-                <a asp-action="EksportExcel" class="btn btn-success ms-2">📥 Pobierz Raport (Excel)</a>
+            <div class="col-auto ms-auto">
+                <a asp-action="Historia" class="btn btn-outline-primary me-2">
+                    📜 Przeglądaj Historię
+                </a>
+
+                <a asp-action="EksportExcel" class="btn btn-success">
+                    📥 Pobierz Raport (Excel)
+                </a>
             </div>
         </div>
     </div>

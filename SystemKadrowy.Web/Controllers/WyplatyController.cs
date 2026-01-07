@@ -138,12 +138,12 @@ namespace SystemKadrowy.Web.Controllers
                 Miesiac = miesiac,
                 DataGenerowania = DateTime.Now,
 
-                // Kopiujemy wartości "na sztywno"
                 Brutto = wynik.Brutto,
                 Netto = wynik.Netto,
                 PremiaBrutto = wynik.PremiaBrutto,
+                CalicowiteBrutto = wynik.CalicowiteBrutto,
                 PotraceniaKomornicze = wynik.PotraceniaKomornicze,
-                DoWyplaty = wynik.DoWyplaty, // <-- Zapisujemy finalną kwotę
+                DoWyplaty = wynik.DoWyplaty,
                 PrzepracowaneGodziny = godziny,
                 ZUS_Razem = wynik.ZUS_Razem,
                 SkladkaZdrowotna = wynik.SkladkaZdrowotna,
@@ -254,5 +254,18 @@ namespace SystemKadrowy.Web.Controllers
                 }
             }
         }
+
+        public async Task<IActionResult> Historia()
+        {
+            var wyplaty = await _context.Wyplaty
+                .Include(w => w.Pracownik) // Dołączamy pracownika, żeby widzieć nazwisko
+                .OrderByDescending(w => w.Rok)
+                .ThenByDescending(w => w.Miesiac)
+                .ToListAsync();
+
+            return View(wyplaty);
+        }
+
+
     }
 }

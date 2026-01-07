@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SystemKadrowy.Core.Domain
 {
@@ -28,6 +29,8 @@ namespace SystemKadrowy.Core.Domain
         public decimal Podatek { get; set; } // Zaliczka PIT
         public decimal KosztyUzyskania { get; set; }
         public decimal PremiaBrutto { get; set; }
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal CalicowiteBrutto { get; set; }
         public decimal WynagrodzenieChorobowe { get; set; } // To jest te 80%
         public decimal PotracenieZaNieobecnosci { get; set; } // To jest to co odejmujemy z podstawy
         public int IleDniNieobecnosci { get; set; }       // Np. 3 dni
