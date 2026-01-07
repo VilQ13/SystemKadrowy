@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using SystemKadrowy.Core.Domain;
 using SystemKadrowy.Infrastructure.Persistence;
+using System.Security.Claims;
 
 namespace SystemKadrowy.Web.Controllers
 {
@@ -16,11 +18,13 @@ namespace SystemKadrowy.Web.Controllers
     {
         private readonly KadryDbContext _context;
         private readonly IWebHostEnvironment _hostEnvironment;
+        private readonly UserManager<IdentityUser> _userManager;
 
-        public PracownicyController(KadryDbContext context, IWebHostEnvironment hostEnvironment)
+        public PracownicyController(KadryDbContext context, IWebHostEnvironment hostEnvironment, UserManager<IdentityUser> userManager)
         {
             _context = context;
             _hostEnvironment = hostEnvironment;
+            _userManager = userManager;
         }
 
         // GET: Pracownicy
@@ -85,6 +89,50 @@ namespace SystemKadrowy.Web.Controllers
 
             if (ModelState.IsValid)
             {
+                if (!string.IsNullOrEmpty(pracownik.Email))
+                {
+                    // Sprawdzamy, czy taki email już jest w systemie Identity
+                    var istniejacyUser = await _userManager.FindByEmailAsync(pracownik.Email);
+                    if (istniejacyUser != null)
+                    {
+                        ModelState.AddModelError("Email", "Konto z tym adresem e-mail już istnieje w systemie.");
+                        return View(pracownik);
+                    }
+
+                    // Tworzymy nowy obiekt użytkownika
+                    var nowyUser = new IdentityUser
+                    {
+                        UserName = pracownik.Email, // Loginem będzie email
+                        Email = pracownik.Email,
+                        EmailConfirmed = true // Od razu potwierdzamy, bo to konto pracownicze zakładane przez Admina
+                    };
+
+                    // Ustalamy hasło startowe. 
+                    // W prawdziwym projekcie wysłałbyś je mailem lub wymusił zmianę przy pierwszym logowaniu.
+                    string hasloStartowe = "Start123!";
+
+                    var result = await _userManager.CreateAsync(nowyUser, hasloStartowe);
+
+                    if (result.Succeeded)
+                    {
+                        // NOWOŚĆ: Dodajemy "naklejkę" (Claim), że hasło musi być zmienione
+                        await _userManager.AddClaimAsync(nowyUser, new Claim("WymuszonaZmianaHasla", "Tak"));
+                    }
+
+                    if (!result.Succeeded)
+                    {
+                        // Jeśli Identity zwróci błędy (np. za słabe hasło), dodajemy je do widoku
+                        foreach (var error in result.Errors)
+                        {
+                            ModelState.AddModelError(string.Empty, $"Błąd tworzenia konta: {error.Description}");
+                        }
+                        return View(pracownik); // Przerywamy, nie tworzymy pracownika
+                    }
+
+                    // Opcjonalnie: Możesz tutaj dodać użytkownika do roli, np. "Pracownik"
+                    // await _userManager.AddToRoleAsync(nowyUser, "Pracownik");
+                }
+
                 // --- LOGIKA ZAPISU ZDJĘCIA ---
                 if (plikZdjecia != null)
                 {

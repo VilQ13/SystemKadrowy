@@ -1,8 +1,116 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@model SystemKadrowy.Web.Models.DashboardViewModel
+@{
+    ViewData["Title"] = "Pulpit Nawigacyjny";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="text-center mb-5">
+    <h1 class="display-4">Witaj w Pulpicie Nawigacyjnym</h1>
 </div>
+
+@if (!User.Identity.IsAuthenticated)
+{
+    <div class="alert alert-info">
+        Zaloguj się, aby uzyskać dostęp do panelu.
+    </div>
+}
+else if (!User.IsInRole("Admin") && !User.IsInRole("Kadry") && !User.IsInRole("Place"))
+{
+    <div class="alert alert-warning shadow-sm">
+        <h4 class="alert-heading"><i class="bi bi-hourglass-split"></i> Konto oczekuje na uprawnienia</h4>
+        <p>Twoje konto zostało utworzone, ale administrator nie przypisał Ci jeszcze żadnej roli systemowej (Kadry lub Płace).</p>
+        <hr>
+        <p class="mb-0">Skontaktuj się z administratorem IT lub przełożonym.</p>
+    </div>
+}
+else
+{
+    <div class="row">
+
+        @if (User.IsInRole("Admin") || User.IsInRole("Kadry"))
+        {
+            <div class="col-md-6">
+                <div class="card shadow mb-4 border-primary">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">📂 Dział Kadr</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center mb-3">
+                            <div class="col-6">
+                                <h3>@Model.LiczbaPracownikow</h3>
+                                <small class="text-muted">Pracowników w bazie</small>
+                            </div>
+                            <div class="col-6">
+                                <h3>@Model.LiczbaAktywnychUmow</h3>
+                                <small class="text-muted">Aktywnych umów</small>
+                            </div>
+                        </div>
+
+                        <h6>Ostatnio zatrudnieni:</h6>
+                        <ul class="list-group list-group-flush list-group-item-action">
+                            @foreach (var p in Model.OstatnioZatrudnieni)
+                            {
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span>@p.Imie @p.Nazwisko</span>
+                                    <a asp-controller="Pracownicy" asp-action="Details" asp-route-id="@p.Id" class="btn btn-sm btn-outline-primary">Profil</a>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                    <div class="card-footer">
+                        <a asp-controller="Pracownicy" asp-action="Index" class="btn btn-primary w-100">Zarządzaj Pracownikami</a>
+                    </div>
+                </div>
+            </div>
+        }
+
+        @if (User.IsInRole("Admin") || User.IsInRole("Place"))
+        {
+            <div class="col-md-6">
+                <div class="card shadow mb-4 border-success">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">💰 Dział Płac</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center mb-3">
+                            <div class="col-6">
+                                <h3 class="text-success">@Model.SumaWyplatWtymMiesiacu.ToString("C")</h3>
+                                <small class="text-muted">Wypłacono w tym miesiącu</small>
+                            </div>
+                            <div class="col-6">
+                                <h3>@Model.LiczbaWygenerowanychWyplat</h3>
+                                <small class="text-muted">List płac (bieżący m-c)</small>
+                            </div>
+                        </div>
+
+                        <h6>Ostatnie operacje:</h6>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Pracownik</th>
+                                        <th>Kwota</th>
+                                        <th>Data</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var w in Model.OstatnieWyplaty)
+                                    {
+                                        <tr>
+                                            <td>@w.Pracownik.Nazwisko @w.Pracownik.Imie.FirstOrDefault().</td>
+                                            <td class="text-end">@w.DoWyplaty.ToString("C")</td>
+                                            <td><small>@w.DataGenerowania.ToString("dd.MM")</small></td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <a asp-controller="Wyplaty" asp-action="Index" class="btn btn-success w-100">Lista Płac</a>
+                    </div>
+                </div>
+            </div>
+        }
+
+    </div>
+}

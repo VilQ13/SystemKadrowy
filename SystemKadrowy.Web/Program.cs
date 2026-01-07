@@ -5,6 +5,7 @@ using System.Globalization;
 using SystemKadrowy.Core.Interfaces;
 using SystemKadrowy.Core.Services;
 using SystemKadrowy.Infrastructure.Persistence;
+using SystemKadrowy.Web.Filters;
 
 namespace SystemKadrowy.Web
 {
@@ -30,7 +31,10 @@ namespace SystemKadrowy.Web
             builder.Services.AddScoped<IKalkulatorPlac, KalkulatorPlacService>();
 
             // Add services to the container.
-            builder.Services.AddControllersWithViews();
+            builder.Services.AddControllersWithViews(options =>
+            {
+                options.Filters.Add<ZmianaHaslaFilter>();
+            });
 
             var app = builder.Build();
 

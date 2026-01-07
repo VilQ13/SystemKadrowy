@@ -1,0 +1,37 @@
+﻿@{
+    ViewData["Title"] = "Zmiana Hasła";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow">
+            <div class="card-header bg-warning text-dark">
+                <h4>⚠️ Wymagana zmiana hasła</h4>
+            </div>
+            <div class="card-body">
+                <p>To Twoje pierwsze logowanie (lub administrator wymusił zmianę). Aby kontynuować, ustaw nowe, bezpieczne hasło.</p>
+
+                <form method="post">
+                    <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+                    <div class="form-group mb-3">
+                        <label>Obecne hasło (startowe)</label>
+                        <input type="password" name="stareHaslo" class="form-control" required />
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label>Nowe hasło</label>
+                        <input type="password" name="noweHaslo" class="form-control" required />
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label>Powtórz nowe hasło</label>
+                        <input type="password" name="powtorzHaslo" class="form-control" required />
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100">Zmień hasło i zaloguj</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
