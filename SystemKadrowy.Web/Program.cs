@@ -29,6 +29,7 @@ namespace SystemKadrowy.Web
 
             // Rejestracja serwisu obliczeniowego
             builder.Services.AddScoped<IKalkulatorPlac, KalkulatorPlacService>();
+            builder.Services.AddScoped<SystemKadrowy.Web.Services.AnomalyDetectorService>();
 
             // Add services to the container.
             builder.Services.AddControllersWithViews(options =>

@@ -6,6 +6,7 @@ using SystemKadrowy.Core.Interfaces;
 using SystemKadrowy.Infrastructure.Persistence;
 using ClosedXML.Excel;
 using System.IO;
+using SystemKadrowy.Web.Services;
 
 namespace SystemKadrowy.Web.Controllers
 {
@@ -14,12 +15,14 @@ namespace SystemKadrowy.Web.Controllers
     {
         private readonly KadryDbContext _context;
         private readonly IKalkulatorPlac _kalkulator;
+        private readonly AnomalyDetectorService _anomalyService;
 
         // Konstruktor: Tutaj "prosimy" system o Bazę i Kalkulator
-        public WyplatyController(KadryDbContext context, IKalkulatorPlac kalkulator)
+        public WyplatyController(KadryDbContext context, IKalkulatorPlac kalkulator, AnomalyDetectorService anomalyService)
         {
             _context = context;
             _kalkulator = kalkulator;
+            _anomalyService = anomalyService;
         }
 
         // Akcja: Wyświetl listę pracowników, żeby wybrać, komu liczymy wypłatę
@@ -77,6 +80,14 @@ namespace SystemKadrowy.Web.Controllers
 
             // 4. Przekazujemy listę do kalkulatora
             WynikWyplaty wynik = _kalkulator.Oblicz(aktywnaUmowa, premia, potracenie, godziny, nieobecnosci);
+
+            var ostrzezenieAI = await _anomalyService.SprawdzCzyAnomalia(pracownik.Id, premia);
+
+            if (ostrzezenieAI != null)
+            {
+                // Przekazujemy ostrzeżenie do widoku za pomocą ViewBag
+                ViewBag.AiWarning = ostrzezenieAI;
+            }
 
             ViewBag.WpisanaPremia = premia;
             ViewBag.WpisanePotracenie = potracenie;
