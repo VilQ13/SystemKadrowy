@@ -1,17 +1,16 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using SystemKadrowy.Web.Models; // Pamiętaj o tym usingu!
+using SystemKadrowy.Web.Models;
 
 namespace SystemKadrowy.Web.Controllers
 {
-    [Authorize(Roles = "Admin")] // <--- TYLKO ADMIN MOŻE TU WEJŚĆ
+    [Authorize(Roles = "Admin")] // Tylko Admin może zarządzać kontami
     public class UzytkownicyController : Controller
     {
         private readonly UserManager<IdentityUser> _userManager;
-        private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly RoleManager<IdentityRole> _roleManager; // <-- NOWOŚĆ: Zarządzanie rolami
 
         public UzytkownicyController(UserManager<IdentityUser> userManager, RoleManager<IdentityRole> roleManager)
         {
@@ -19,52 +18,115 @@ namespace SystemKadrowy.Web.Controllers
             _roleManager = roleManager;
         }
 
-        // 1. LISTA UŻYTKOWNIKÓW
+        // GET: Uzytkownicy (Lista)
         public async Task<IActionResult> Index()
         {
-            // Pobieramy wszystkich użytkowników
-            var users = await _userManager.Users.ToListAsync();
-            return View(users);
+            var uzytkownicy = await _userManager.Users.ToListAsync();
+            // Możemy tu dodać ViewModel, żeby wyświetlić też role na liście, 
+            // ale na razie prosta lista wystarczy.
+            return View(uzytkownicy);
         }
 
-        // 2. FORMULARZ TWORZENIA (GET)
-        public IActionResult Create()
+        // GET: Uzytkownicy/Edit/5
+        public async Task<IActionResult> Edit(string id)
         {
-            // Przekazujemy listę ról do listy rozwijanej (Dropdown)
-            // SelectList(Źródło, Wartość_Do_Bazy, Wartość_Wyświetlana)
-            ViewBag.Role = new SelectList(_roleManager.Roles, "Name", "Name");
-            return View();
+            if (id == null) return NotFound();
+
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null) return NotFound();
+
+            // Pobieramy role tego konkretnego użytkownika
+            var userRoles = await _userManager.GetRolesAsync(user);
+
+            // Pobieramy listę wszystkich dostępnych ról w systemie
+            var allRoles = await _roleManager.Roles.Select(r => r.Name).ToListAsync();
+
+            var model = new EdytujUzytkownikaViewModel
+            {
+                Id = user.Id,
+                Email = user.Email,
+                PrzypisaneRole = userRoles,
+                DostepneRole = allRoles
+            };
+
+            return View(model);
         }
 
-        // 3. LOGIKA TWORZENIA (POST)
+        // POST: Uzytkownicy/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(RejestracjaViewModel model)
+        public async Task<IActionResult> Edit(EdytujUzytkownikaViewModel model)
         {
+            var user = await _userManager.FindByIdAsync(model.Id);
+            if (user == null) return NotFound();
+
             if (ModelState.IsValid)
             {
-                var user = new IdentityUser { UserName = model.Email, Email = model.Email, EmailConfirmed = true };
-
-                // A. Tworzymy użytkownika
-                var result = await _userManager.CreateAsync(user, model.Haslo);
-
-                if (result.Succeeded)
+                // 1. Aktualizacja Emaila/Loginu
+                if (user.Email != model.Email)
                 {
-                    // B. Jeśli się udało, przypisujemy rolę
-                    await _userManager.AddToRoleAsync(user, model.Rola);
-                    return RedirectToAction(nameof(Index));
+                    user.Email = model.Email;
+                    user.UserName = model.Email; // Zakładamy, że login = email
+                    await _userManager.UpdateAsync(user);
                 }
 
-                // Jeśli były błędy (np. za słabe hasło), dodaj je do widoku
-                foreach (var error in result.Errors)
+                // 2. Aktualizacja Ról (To jest kluczowa część)
+
+                // A. Pobierz aktualne role z bazy
+                var obecneRole = await _userManager.GetRolesAsync(user);
+
+                // B. Pobierz role wybrane w formularzu (checkboxy)
+                // (W tym prostym przykładzie zakładamy, że model.PrzypisaneRole zawiera zaznaczone)
+                // Uwaga: W widoku użyjemy sprytnego triku z nazwami checkboxów.
+                // Tutaj musimy odczytać formularz ręcznie lub dostosować model pod checkboxy.
+                // Zróbmy prościej: Przekażemy wybrane role przez osobny parametr lub "Request.Form".
+
+                // Dla uproszczenia edukacyjnego:
+                // Usuwamy użytkownika ze wszystkich ról i dodajemy do wybranych.
+                // W produkcji robi się to bardziej "delta" (tylko różnice), ale tak jest czytelniej:
+
+                await _userManager.RemoveFromRolesAsync(user, obecneRole);
+
+                // Pobieramy zaznaczone role z formularza (ponieważ List<string> w modelu słabo wiąże checkboxy)
+                var wybraneRole = Request.Form["WybraneRole"].ToList();
+
+                if (wybraneRole.Any())
                 {
-                    ModelState.AddModelError(string.Empty, error.Description);
+                    await _userManager.AddToRolesAsync(user, wybraneRole);
                 }
+
+                return RedirectToAction(nameof(Index));
             }
 
-            // Jeśli coś poszło nie tak, wyświetl formularz ponownie (z listą ról)
-            ViewBag.Role = new SelectList(_roleManager.Roles, "Name", "Name");
+            // Jeśli błąd, przywróć listę ról do widoku
+            model.DostepneRole = await _roleManager.Roles.Select(r => r.Name).ToListAsync();
             return View(model);
+        }
+
+        // GET: Uzytkownicy/Delete/5
+        public async Task<IActionResult> Delete(string id)
+        {
+            if (id == null) return NotFound();
+
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null) return NotFound();
+
+            return View(user);
+        }
+
+        // POST: Uzytkownicy/Delete/5
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(string id)
+        {
+            var user = await _userManager.FindByIdAsync(id);
+            if (user != null)
+            {
+                // Opcjonalnie: Najpierw usuń pracownika powiązanego z tym kontem?
+                // Tutaj usuwamy tylko login (dostęp). Dane kadrowe zostają bezpieczne.
+                await _userManager.DeleteAsync(user);
+            }
+            return RedirectToAction(nameof(Index));
         }
     }
 }

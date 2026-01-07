@@ -1,28 +1,41 @@
-﻿@model IEnumerable<Microsoft.AspNetCore.Identity.IdentityUser>
+﻿@using Microsoft.AspNetCore.Identity
+@model IEnumerable<IdentityUser>
 
 @{
     ViewData["Title"] = "Użytkownicy";
 }
 
-<h1>Lista Użytkowników</h1>
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>👥 Użytkownicy Systemu</h1>
+    <a asp-controller="Pracownicy" asp-action="Create" class="btn btn-success">
+        + Nowy Pracownik (z kontem)
+    </a>
+</div>
 
-<p>
-    <a asp-action="Create" class="btn btn-primary">Dodaj nowego pracownika</a>
-</p>
-
-<table class="table table-striped">
-    <thead>
+<table class="table table-hover">
+    <thead class="table-light">
         <tr>
             <th>Email / Login</th>
             <th>ID</th>
+            <th class="text-end">Akcje</th>
         </tr>
     </thead>
     <tbody>
-        @foreach (var item in Model)
+        @foreach (var user in Model)
         {
             <tr>
-                <td>@item.Email</td>
-                <td>@item.Id</td>
+                <td>
+                    <strong>@user.Email</strong>
+                </td>
+                <td><small class="text-muted">@user.Id</small></td>
+                <td class="text-end">
+                    <a asp-action="Edit" asp-route-id="@user.Id" class="btn btn-sm btn-warning me-1">
+                        ✏ Edytuj / Role
+                    </a>
+                    <a asp-action="Delete" asp-route-id="@user.Id" class="btn btn-sm btn-danger">
+                        🗑 Usuń
+                    </a>
+                </td>
             </tr>
         }
     </tbody>
