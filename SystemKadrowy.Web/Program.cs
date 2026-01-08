@@ -30,6 +30,7 @@ namespace SystemKadrowy.Web
             // Rejestracja serwisu obliczeniowego
             builder.Services.AddScoped<IKalkulatorPlac, KalkulatorPlacService>();
             builder.Services.AddScoped<SystemKadrowy.Web.Services.AnomalyDetectorService>();
+            builder.Services.AddTransient<SystemKadrowy.Web.Services.DaneTestoweSeeder>();
 
             // Add services to the container.
             builder.Services.AddControllersWithViews(options =>
@@ -80,7 +81,11 @@ namespace SystemKadrowy.Web
             using (var scope = app.Services.CreateScope())
             {
                 var services = scope.ServiceProvider;
-                SystemKadrowy.Web.Services.UserSeeder.SeedRolesAndAdminAsync(services).Wait(); ;
+                SystemKadrowy.Web.Services.UserSeeder.SeedRolesAndAdminAsync(services).Wait();
+
+
+                var daneTestowe = services.GetRequiredService<SystemKadrowy.Web.Services.DaneTestoweSeeder>();
+                daneTestowe.ZainicjujDane().Wait();
             }
 
             app.Run();
