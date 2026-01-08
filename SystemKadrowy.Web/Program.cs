@@ -63,6 +63,7 @@ namespace SystemKadrowy.Web
                 app.UseHsts();
             }
 
+
             app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseRouting();
@@ -81,11 +82,26 @@ namespace SystemKadrowy.Web
             using (var scope = app.Services.CreateScope())
             {
                 var services = scope.ServiceProvider;
-                SystemKadrowy.Web.Services.UserSeeder.SeedRolesAndAdminAsync(services).Wait();
 
+                try
+                {
+                    // 1. Migracja Bazy (Tworzenie struktury)
+                    var context = services.GetRequiredService<KadryDbContext>();
+                    context.Database.Migrate();
 
-                var daneTestowe = services.GetRequiredService<SystemKadrowy.Web.Services.DaneTestoweSeeder>();
-                daneTestowe.ZainicjujDane().Wait();
+                    // 2. Seeder U¿ytkowników i Ról
+                    SystemKadrowy.Web.Services.UserSeeder.SeedRolesAndAdminAsync(services).Wait();
+
+                    // 3. Seeder Danych Testowych
+                    var dataSeeder = services.GetRequiredService<SystemKadrowy.Web.Services.DaneTestoweSeeder>();
+                    dataSeeder.ZainicjujDane().Wait();
+                }
+                catch (Exception ex)
+                {
+                    // Logujemy b³¹d, jeœli coœ pójdzie nie tak
+                    var logger = services.GetRequiredService<ILogger<Program>>();
+                    logger.LogError(ex, "Wyst¹pi³ b³¹d podczas migracji lub inicjalizacji bazy danych.");
+                }
             }
 
             app.Run();
