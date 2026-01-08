@@ -1,73 +1,249 @@
 ﻿@model IEnumerable<SystemKadrowy.Core.Domain.Pracownik>
 
 @{
-    ViewData["Title"] = "Lista Płac";
+    ViewData["Title"] = "Generator Listy Płac";
     var obecnyMiesiac = DateTime.Now.ToString("yyyy-MM");
 }
 
-<h1>Generowanie Listy Płac</h1>
+<style>
+    /* 1. Nagłówek (Finansowy - Zielono-Turkusowy lub spójny Niebieski)
+           Użyjmy Niebieskiego dla spójności list, ale z ikoną pieniędzy */
+    .page-header {
+        background: linear-gradient(135deg, #4dabf7 0%, #339af0 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 6px rgba(51, 154, 240, 0.3);
+    }
 
+        .page-header h1 {
+            margin: 0 0 0.5rem 0;
+            font-size: 2rem;
+            font-weight: 600;
+        }
 
-<div class="card mb-4 border-primary">
-    <div class="card-header bg-primary text-white">
-        Ustawienia Generatora
+        .page-header p {
+            margin: 0;
+            opacity: 0.9;
+        }
+
+    /* 2. Panel Sterowania (Generator) */
+    .control-panel {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem 2rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        margin-bottom: 2rem;
+        border-left: 5px solid #51cf66; /* Zielony akcent oznaczający finanse */
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1.5rem;
+    }
+
+    .control-group {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .control-label {
+        font-weight: 600;
+        color: #495057;
+        font-size: 1rem;
+    }
+
+    .form-control-custom {
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 0.6rem 1rem;
+        font-size: 1rem;
+        font-weight: 600;
+        color: #495057;
+        transition: all 0.2s ease;
+    }
+
+        .form-control-custom:focus {
+            border-color: #51cf66;
+            box-shadow: 0 0 0 3px rgba(81, 207, 102, 0.1);
+            outline: none;
+        }
+
+    /* 3. Przyciski w panelu */
+    .btn-history {
+        background: white;
+        color: #495057;
+        border: 1px solid #dee2e6;
+        padding: 0.6rem 1.2rem;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+        .btn-history:hover {
+            background: #f8f9fa;
+            border-color: #adb5bd;
+            color: #212529;
+        }
+
+    .btn-excel {
+        background: #207245; /* Excel Green */
+        color: white;
+        padding: 0.6rem 1.2rem;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        border: none;
+    }
+
+        .btn-excel:hover {
+            background: #154a2d;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+    /* 4. Tabela */
+    .card-table {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        overflow: hidden;
+    }
+
+    .table-custom {
+        margin: 0;
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+        .table-custom thead {
+            background: #f8f9fa;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+            .table-custom thead th {
+                padding: 1rem 1.5rem;
+                font-weight: 600;
+                color: #495057;
+                font-size: 0.875rem;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                border: none;
+            }
+
+        .table-custom tbody tr {
+            border-bottom: 1px solid #f1f3f5;
+            transition: background-color 0.2s ease;
+        }
+
+            .table-custom tbody tr:hover {
+                background-color: #f8f9fa;
+            }
+
+        .table-custom tbody td {
+            padding: 1rem 1.5rem;
+            vertical-align: middle;
+            color: #495057;
+            border: none;
+        }
+
+    /* 5. Przycisk "Oblicz" w tabeli */
+    .btn-salary {
+        background: #51cf66;
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.9rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.2s ease;
+        border: none;
+    }
+
+        .btn-salary:hover {
+            background: #40c057;
+            transform: translateY(-2px);
+            color: white;
+            box-shadow: 0 4px 6px rgba(81, 207, 102, 0.2);
+        }
+
+    .employee-email {
+        font-size: 0.85rem;
+        color: #868e96;
+    }
+</style>
+
+<div class="page-header">
+    <h1>💰 Generowanie Listy Płac</h1>
+    <p>Wybierz okres rozliczeniowy i nalicz wynagrodzenia pracownikom</p>
+</div>
+
+<div class="control-panel">
+    <div class="control-group">
+        <label for="okres" class="control-label">📅 Okres rozliczeniowy:</label>
+        <input type="month" id="okres" name="okres" class="form-control-custom" value="@obecnyMiesiac" onchange="zaktualizujLinki()" />
+        <small class="text-muted ms-2">(Zmienia linki "Oblicz")</small>
     </div>
-    <div class="card-body bg-light">
-        <div class="row align-items-center">
-            <div class="col-auto">
-                <label for="okres" class="col-form-label fw-bold">Wybierz okres rozliczeniowy:</label>
-            </div>
-            <div class="col-auto">
-                <input type="month" id="okres" name="okres" class="form-control fw-bold text-primary" value="@obecnyMiesiac" onchange="zaktualizujLinki()" />
-            </div>
-            <div class="col-auto">
-                <small class="text-muted">Zmiana daty automatycznie zaktualizuje linki "Oblicz" poniżej.</small>
-            </div>
-            <div class="col-auto ms-auto">
-                <a asp-action="Historia" class="btn btn-outline-primary me-2">
-                    📜 Przeglądaj Historię
-                </a>
 
-                <a asp-action="EksportExcel" class="btn btn-success">
-                    📥 Pobierz Raport (Excel)
-                </a>
-            </div>
-        </div>
+    <div class="control-group">
+        <a asp-action="Historia" class="btn-history">
+            📜 Historia wypłat
+        </a>
+        <a asp-action="EksportExcel" class="btn-excel">
+            📥 Eksport Excel
+        </a>
     </div>
 </div>
 
-<table class="table table-hover table-striped">
-    <thead class="table-dark">
-        <tr>
-            <th>Imię i Nazwisko</th>
-            <th>PESEL</th>
-            <th class="text-end">Akcja</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
+<div class="card-table">
+    <table class="table-custom">
+        <thead>
             <tr>
-                <td class="align-middle">
-                    <strong>@item.Imie @item.Nazwisko</strong>
-                    <br />
-                    <small class="text-muted">@item.Email</small>
-                </td>
-                <td class="align-middle">@item.PESEL</td>
-                <td class="text-end">
-                    <a href="#" data-id="@item.Id" class="btn-oblicz btn btn-outline-success btn-sm">
-                        💰 Oblicz Wypłatę
-                    </a>
-                </td>
+                <th>Pracownik</th>
+                <th>PESEL</th>
+                <th style="text-align: right;">Akcja</th>
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        <div style="font-weight: 600; color: #212529;">@item.Imie @item.Nazwisko</div>
+                        <div class="employee-email">@item.Email</div>
+                    </td>
+                    <td>@item.PESEL</td>
+                    <td style="text-align: right;">
+                        <a href="#" data-id="@item.Id" class="btn-oblicz btn-salary">
+                            💰 Oblicz Wypłatę
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
 
 @section Scripts {
     <script>
         function zaktualizujLinki() {
             var dataInput = document.getElementById('okres').value;
+            // Zabezpieczenie na wypadek pustej daty
+            if (!dataInput) return;
+
             var czesci = dataInput.split('-');
             var rok = czesci[0];
             var miesiac = czesci[1];
@@ -77,6 +253,7 @@
             for (var i = 0; i < przyciski.length; i++) {
                 var btn = przyciski[i];
                 var idPracownika = btn.getAttribute('data-id');
+                // Generowanie poprawnego linku
                 var nowyLink = '/Wyplaty/Oblicz/' + idPracownika + '?rok=' + rok + '&miesiac=' + miesiac;
                 btn.href = nowyLink;
             }

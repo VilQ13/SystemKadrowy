@@ -4,37 +4,147 @@
     ViewData["Title"] = "Nowy Użytkownik";
 }
 
-<h1>Utwórz Użytkownika</h1>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+<style>
+    /* 1. Nagłówek w stylu "Create" (Zielony) */
+    .page-header {
+        background: linear-gradient(135deg, #51cf66 0%, #40c057 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 6px rgba(81, 207, 102, 0.3);
+        text-align: center; /* Wyśrodkowanie dla lepszego efektu przy węższej treści */
+    }
 
-            <div class="form-group mb-3">
-                <label asp-for="Email" class="control-label"></label>
-                <input asp-for="Email" class="form-control" placeholder="imie@firma.pl" />
-                <span asp-validation-for="Email" class="text-danger"></span>
-            </div>
+        .page-header h1 {
+            margin: 0 0 0.5rem 0;
+            font-size: 2rem;
+            font-weight: 600;
+        }
 
-            <div class="form-group mb-3">
-                <label asp-for="Haslo" class="control-label">Hasło</label>
-                <input asp-for="Haslo" class="form-control" type="password" />
-                <span asp-validation-for="Haslo" class="text-danger"></span>
-            </div>
+        .page-header p {
+            margin: 0;
+            opacity: 0.9;
+            font-size: 0.95rem;
+        }
 
-            <div class="form-group mb-3">
-                <label asp-for="Rola" class="control-label">Rola w systemie</label>
-                <select asp-for="Rola" class="form-control" asp-items="ViewBag.Role"></select>
-                <span asp-validation-for="Rola" class="text-danger"></span>
-            </div>
+    /* 2. Link powrotu */
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 500;
+        margin-bottom: 1.5rem;
+        transition: all 0.2s ease;
+    }
 
-            <div class="form-group">
-                <input type="submit" value="Utwórz konto" class="btn btn-success" />
-                <a asp-action="Index" class="btn btn-secondary">Powrót</a>
-            </div>
-        </form>
-    </div>
+        .back-link:hover {
+            color: #5568d3;
+            gap: 0.7rem;
+        }
+
+    /* 3. Główny kontener formularza */
+    .form-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        padding: 2.5rem;
+        max-width: 600px; /* Węższa karta dla rejestracji */
+        margin: 0 auto; /* Wyśrodkowanie karty */
+    }
+
+    /* 4. Stylowanie inputów */
+    .form-label-custom {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+    }
+
+    .form-control-custom {
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 0.75rem;
+        transition: all 0.2s ease;
+        font-size: 0.95rem;
+    }
+
+        .form-control-custom:focus {
+            border-color: #51cf66;
+            box-shadow: 0 0 0 3px rgba(81, 207, 102, 0.1);
+            outline: none;
+        }
+
+    .form-group-custom {
+        margin-bottom: 1.5rem;
+    }
+
+    /* 5. Przycisk (Zielony) */
+    .btn-create {
+        background: linear-gradient(135deg, #51cf66 0%, #40c057 100%);
+        color: white;
+        padding: 0.875rem 2.5rem;
+        border-radius: 8px;
+        border: none;
+        font-weight: 600;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 4px rgba(81, 207, 102, 0.3);
+        cursor: pointer;
+        width: 100%; /* Przycisk na całą szerokość */
+    }
+
+        .btn-create:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(81, 207, 102, 0.4);
+        }
+
+    .text-danger {
+        font-size: 0.85rem;
+        margin-top: 0.25rem;
+        display: block;
+    }
+</style>
+
+<a asp-action="Index" class="back-link">
+    ← Powrót do listy
+</a>
+
+<div class="page-header">
+    <h1>👤 Nowy Użytkownik</h1>
+    <p>Utwórz konto dostępowe do systemu</p>
+</div>
+
+<div class="form-card">
+    <form asp-action="Create">
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+        <div class="form-group-custom">
+            <label asp-for="Email" class="form-label-custom">📧 Adres Email (Login)</label>
+            <input asp-for="Email" class="form-control form-control-custom" placeholder="imie@firma.pl" />
+            <span asp-validation-for="Email" class="text-danger"></span>
+        </div>
+
+        <div class="form-group-custom">
+            <label asp-for="Haslo" class="form-label-custom">🔑 Hasło</label>
+            <input asp-for="Haslo" class="form-control form-control-custom" type="password" placeholder="••••••••" />
+            <span asp-validation-for="Haslo" class="text-danger"></span>
+        </div>
+
+        <div class="form-group-custom">
+            <label asp-for="Rola" class="form-label-custom">🛡️ Rola w systemie</label>
+            <select asp-for="Rola" class="form-control form-control-custom" asp-items="ViewBag.Role">
+                <option value="" disabled selected>-- Wybierz rolę --</option>
+            </select>
+            <span asp-validation-for="Rola" class="text-danger"></span>
+        </div>
+
+        <div class="form-group-custom" style="margin-top: 2rem;">
+            <button type="submit" class="btn-create">✅ Utwórz konto</button>
+        </div>
+    </form>
 </div>
 
 @section Scripts {

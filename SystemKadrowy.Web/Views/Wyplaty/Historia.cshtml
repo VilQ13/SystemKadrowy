@@ -4,56 +4,257 @@
     ViewData["Title"] = "Historia Wypłat";
 }
 
-<div class="d-flex justify-content-between align-items-center mb-4">
+<style>
+    /* 1. Nagłówek (Niebieski - Spójny z Generatorem) */
+    .page-header {
+        background: linear-gradient(135deg, #4dabf7 0%, #339af0 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 6px rgba(51, 154, 240, 0.3);
+    }
+
+        .page-header h1 {
+            margin: 0 0 0.5rem 0;
+            font-size: 2rem;
+            font-weight: 600;
+        }
+
+        .page-header p {
+            margin: 0;
+            opacity: 0.9;
+        }
+
+    /* 2. Link powrotu */
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #339af0;
+        text-decoration: none;
+        font-weight: 500;
+        margin-bottom: 1.5rem;
+        transition: all 0.2s ease;
+    }
+
+        .back-link:hover {
+            color: #1c7ed6;
+            gap: 0.7rem;
+        }
+
+    /* 3. Tabela */
+    .card-table {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        overflow: hidden;
+    }
+
+    .table-custom {
+        margin: 0;
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+        .table-custom thead {
+            background: #f8f9fa;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+            .table-custom thead th {
+                padding: 1rem 1.5rem;
+                font-weight: 600;
+                color: #495057;
+                font-size: 0.875rem;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                border: none;
+            }
+
+        .table-custom tbody tr {
+            border-bottom: 1px solid #f1f3f5;
+            transition: background-color 0.2s ease;
+        }
+
+            .table-custom tbody tr:hover {
+                background-color: #f8f9fa;
+            }
+
+        .table-custom tbody td {
+            padding: 1rem 1.5rem;
+            vertical-align: middle;
+            color: #495057;
+            border: none;
+        }
+
+    /* 4. Elementy tabeli */
+    .employee-name {
+        font-weight: 600;
+        color: #212529;
+        display: block;
+    }
+
+    .employee-pesel {
+        font-size: 0.85rem;
+        color: #868e96;
+    }
+
+    .period-badge {
+        display: inline-block;
+        background: #e7f5ff;
+        color: #1c7ed6;
+        padding: 0.35rem 0.75rem;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+
+    .generation-date {
+        font-size: 0.9rem;
+        color: #495057;
+    }
+
+        .generation-date small {
+            color: #868e96;
+        }
+
+    .salary-amount {
+        font-family: 'Consolas', monospace;
+        font-weight: 700;
+        color: #2b8a3e;
+        font-size: 1.1rem;
+    }
+
+    /* 5. Przyciski akcji */
+    .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+        justify-content: flex-end;
+    }
+
+    .btn-action {
+        padding: 0.4rem 0.8rem;
+        border-radius: 6px;
+        text-decoration: none;
+        font-size: 0.875rem;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        border: 1px solid transparent;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+
+    /* Przycisk PDF (Czerwony) */
+    .btn-pdf {
+        background: white;
+        color: #e03131;
+        border: 1px solid #ffc9c9;
+    }
+
+        .btn-pdf:hover {
+            background: #fff5f5;
+            border-color: #e03131;
+            color: #c92a2a;
+        }
+
+    /* Przycisk Szczegóły (Szary/Niebieski) */
+    .btn-details {
+        background: white;
+        color: #495057;
+        border: 1px solid #dee2e6;
+    }
+
+        .btn-details:hover {
+            background: #f8f9fa;
+            border-color: #adb5bd;
+            color: #212529;
+        }
+
+    /* 6. Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: #868e96;
+    }
+
+        .empty-state svg {
+            width: 64px;
+            height: 64px;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+</style>
+
+<a asp-action="Index" class="back-link">
+    ← Wróć do generatora
+</a>
+
+<div class="page-header">
     <h1>📜 Archiwum Wypłat</h1>
-    <a asp-action="Index" class="btn btn-secondary">⬅ Wróć do generatora</a>
+    <p>Przeglądaj historię wygenerowanych list płac</p>
 </div>
 
-<table class="table table-hover align-middle">
-    <thead class="table-light">
-        <tr>
-            <th>Pracownik</th>
-            <th>Okres</th>
-            <th>Data Utworzenia</th>
-            <th class="text-end">Do Wypłaty</th>
-            <th class="text-center">Akcje</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
-            <tr>
-                <td>
-                    <strong>@item.Pracownik.Nazwisko @item.Pracownik.Imie</strong>
-                    <br />
-                    <small class="text-muted">PESEL: @item.Pracownik.PESEL</small>
-                </td>
-                <td>
-                    <span class="badge bg-info text-dark">
-                        @item.Miesiac / @item.Rok
-                    </span>
-                </td>
-                <td>@item.DataGenerowania.ToString("dd.MM.yyyy HH:mm")</td>
-                <td class="text-end fw-bold text-success">
-                    @item.DoWyplaty.ToString("N2") zł
-                </td>
-                <td class="text-center">
-                    <a asp-action="Drukuj" asp-route-id="@item.Id" class="btn btn-danger btn-sm" target="_blank">
-                        <i class="bi bi-file-earmark-pdf"></i> Drukuj PDF
-                    </a>
+<div class="card-table">
+    @if (Model.Any())
+    {
+        <table class="table-custom">
+            <thead>
+                <tr>
+                    <th>Pracownik</th>
+                    <th>Okres</th>
+                    <th>Data utworzenia</th>
+                    <th style="text-align: right;">Do wypłaty</th>
+                    <th style="text-align: right;">Akcje</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>
+                            <span class="employee-name">@item.Pracownik.Nazwisko @item.Pracownik.Imie</span>
+                            <span class="employee-pesel">PESEL: @item.Pracownik.PESEL</span>
+                        </td>
+                        <td>
+                            <span class="period-badge">
+                                @item.Miesiac / @item.Rok
+                            </span>
+                        </td>
+                        <td>
+                            <div class="generation-date">
+                                @item.DataGenerowania.ToString("dd.MM.yyyy")<br />
+                                <small>@item.DataGenerowania.ToString("HH:mm")</small>
+                            </div>
+                        </td>
+                        <td style="text-align: right;">
+                            <span class="salary-amount">@item.DoWyplaty.ToString("N2") zł</span>
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <a asp-action="Drukuj" asp-route-id="@item.Id" class="btn-action btn-pdf" target="_blank">
+                                    📄 PDF
+                                </a>
 
-                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline-primary btn-sm ms-1">
-                        Szczegóły
-                    </a>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
-
-@if (!Model.Any())
-{
-    <div class="alert alert-warning text-center">
-        Brak wygenerowanych wypłat w systemie.
-    </div>
-}
+                                <a asp-action="Details" asp-route-id="@item.Id" class="btn-action btn-details">
+                                    👁️ Szczegóły
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <div class="empty-state">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+            </svg>
+            <h3>Brak historii</h3>
+            <p>Nie znaleziono żadnych archiwalnych wypłat w systemie.</p>
+        </div>
+    }
+</div>

@@ -1,132 +1,434 @@
 ﻿@model SystemKadrowy.Core.Domain.Pracownik
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Szczegóły pracownika";
 }
 
-<h1>Details</h1>
+<style>
+    .page-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
 
-<div>
-    <h4>Pracownik</h4>
-    <hr />
-    <dt class="col-sm-2">Zdjęcie</dt>
-    <dd class="col-sm-10">
-        @if (!string.IsNullOrEmpty(Model.ZdjecieSciezka))
-        {
-            <img src="~/zdjecia/@Model.ZdjecieSciezka"
-                 alt="Zdjęcie pracownika"
-                 class="img-thumbnail"
-                 style="max-width: 200px; max-height: 200px;" />
+        .page-header h1 {
+            margin: 0 0 0.5rem 0;
+            font-size: 2rem;
+            font-weight: 600;
         }
-        else
-        {
-            <img src="https://via.placeholder.com/150?text=Brak+Zdjecia" class="img-thumbnail" />
+
+        .page-header p {
+            margin: 0;
+            opacity: 0.9;
+            font-size: 0.95rem;
         }
-    </dd>
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Imie)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Imie)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Nazwisko)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Nazwisko)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.PESEL)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.PESEL)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.DataUrodzenia)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.DataUrodzenia)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Email)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Email)
-        </dd>
-    </dl>
-    <dl class="row">
-        <dt class="col-sm-3">Adres:</dt>
-        <dd class="col-sm-9">
-            @if (Model.AdresZamieszkania != null)
+
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 500;
+        margin-bottom: 1.5rem;
+        transition: all 0.2s ease;
+    }
+
+        .back-link:hover {
+            color: #5568d3;
+            gap: 0.7rem;
+        }
+
+    .profile-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        overflow: hidden;
+        margin-bottom: 2rem;
+    }
+
+    .profile-header {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        padding: 2rem;
+        display: flex;
+        gap: 2rem;
+        align-items: center;
+    }
+
+    .profile-photo {
+        flex-shrink: 0;
+    }
+
+        .profile-photo img {
+            width: 150px;
+            height: 150px;
+            border-radius: 12px;
+            object-fit: cover;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            border: 4px solid white;
+        }
+
+    .profile-info {
+        flex: 1;
+    }
+
+    .profile-name {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #212529;
+        margin-bottom: 0.5rem;
+    }
+
+    .profile-meta {
+        display: flex;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+    }
+
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #6c757d;
+        font-size: 0.95rem;
+    }
+
+        .meta-item strong {
+            color: #495057;
+        }
+
+    .profile-actions {
+        display: flex;
+        gap: 0.75rem;
+        margin-top: 1rem;
+    }
+
+    .btn-action {
+        padding: 0.6rem 1.2rem;
+        border-radius: 8px;
+        text-decoration: none;
+        font-size: 0.9rem;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-edit {
+        background: #667eea;
+        color: white;
+    }
+
+        .btn-edit:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            color: white;
+        }
+
+    .details-section {
+        padding: 2rem;
+    }
+
+    .section-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #212529;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid #f1f3f5;
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .info-item {
+        background: #f8f9fa;
+        padding: 1.25rem;
+        border-radius: 10px;
+        border-left: 4px solid #667eea;
+    }
+
+    .info-label {
+        font-size: 0.85rem;
+        color: #868e96;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.5rem;
+    }
+
+    .info-value {
+        font-size: 1.1rem;
+        color: #212529;
+        font-weight: 500;
+    }
+
+    .address-card {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        padding: 1.5rem;
+        border-radius: 10px;
+        border: 1px solid #dee2e6;
+    }
+
+    .address-text {
+        font-size: 1rem;
+        color: #495057;
+        line-height: 1.6;
+    }
+
+    .salary-table-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        overflow: hidden;
+        margin-top: 2rem;
+    }
+
+    .salary-table-header {
+        padding: 1.5rem 2rem;
+        background: #f8f9fa;
+        border-bottom: 2px solid #e9ecef;
+    }
+
+        .salary-table-header h3 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #212529;
+        }
+
+    .table-custom {
+        width: 100%;
+        margin: 0;
+    }
+
+        .table-custom thead {
+            background: #f8f9fa;
+        }
+
+            .table-custom thead th {
+                padding: 1rem 1.5rem;
+                font-weight: 600;
+                color: #495057;
+                font-size: 0.875rem;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                border: none;
+                border-bottom: 2px solid #e9ecef;
+            }
+
+        .table-custom tbody td {
+            padding: 1rem 1.5rem;
+            vertical-align: middle;
+            color: #495057;
+            border-bottom: 1px solid #f1f3f5;
+        }
+
+        .table-custom tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .table-custom tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+    .period-badge {
+        display: inline-block;
+        background: #667eea;
+        color: white;
+        padding: 0.4rem 0.8rem;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    .amount-brutto {
+        font-weight: 600;
+        color: #495057;
+    }
+
+    .amount-netto {
+        font-weight: 700;
+        color: #51cf66;
+        font-size: 1.05rem;
+    }
+
+    .btn-view {
+        background: transparent;
+        color: #667eea;
+        border: 1px solid #667eea;
+        padding: 0.4rem 0.8rem;
+        font-size: 0.875rem;
+    }
+
+        .btn-view:hover {
+            background: #667eea;
+            color: white;
+        }
+
+    .btn-print {
+        background: #495057;
+        color: white;
+        padding: 0.4rem 0.8rem;
+        font-size: 0.875rem;
+    }
+
+        .btn-print:hover {
+            background: #343a40;
+            color: white;
+        }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem 2rem;
+        color: #868e96;
+    }
+
+    .empty-state-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+    }
+</style>
+
+<a asp-action="Index" class="back-link">
+    ← Powrót do listy
+</a>
+
+<div class="page-header">
+    <h1>Profil pracownika</h1>
+    <p>Pełne informacje o pracowniku oraz historia wypłat</p>
+</div>
+
+<div class="profile-card">
+    <div class="profile-header">
+        <div class="profile-photo">
+            @if (!string.IsNullOrEmpty(Model.ZdjecieSciezka))
             {
-                <span>
-                    ul. @Model.AdresZamieszkania.Ulica @Model.AdresZamieszkania.NumerDomu
-                    @(Model.AdresZamieszkania.NumerLokalu != null ? "/" + Model.AdresZamieszkania.NumerLokalu : "")
-                </span>
-
-                <br />
-                <span>
-                    @Model.AdresZamieszkania.KodPocztowy.Kod @Model.AdresZamieszkania.KodPocztowy.Miejscowosc
-                </span>
+                <img src="~/zdjecia/@Model.ZdjecieSciezka" alt="Zdjęcie @Model.Imie @Model.Nazwisko" />
             }
             else
             {
-                <span class="text-muted text-italic">Brak adresu</span>
+                <img src="https://via.placeholder.com/150/667eea/ffffff?text=@Model.Imie.Substring(0, 1)@Model.Nazwisko.Substring(0, 1)" alt="Inicjały" />
             }
-        </dd>
+        </div>
 
-        <dt class="col-sm-3">Telefon:</dt>
-        <dd class="col-sm-9">@Model.Telefon</dd>
+        <div class="profile-info">
+            <div class="profile-name">@Model.Imie @Model.Nazwisko</div>
+            <div class="profile-meta">
+                <div class="meta-item">
+                    📧 <strong>@Model.Email</strong>
+                </div>
+                <div class="meta-item">
+                    🆔 PESEL: <strong>@Model.PESEL</strong>
+                </div>
+                <div class="meta-item">
+                    🎂 <strong>@Model.DataUrodzenia.ToString("dd.MM.yyyy")</strong>
+                </div>
+            </div>
+            <div class="profile-actions">
+                <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn-action btn-edit">
+                    ✏️ Edytuj dane
+                </a>
+            </div>
+        </div>
+    </div>
 
-        <dt class="col-sm-3">Konto Bankowe:</dt>
-        <dd class="col-sm-9">@Model.NumerKontaBankowego</dd>
-    </dl>
-</div>
-<hr />
-<h3>Historia Wypłat</h3>
+    <div class="details-section">
+        <div class="section-title">Dane kontaktowe i bankowe</div>
 
-@if (Model.Wyplaty.Count == 0)
-{
-    <div class="alert alert-info">Ten pracownik nie ma jeszcze zatwierdzonych wypłat.</div>
-}
-else
-{
-    <table class="table table-striped table-hover">
-        <thead class="thead-dark">
-            <tr>
-                <th>Okres</th>
-                <th>Data Utworzenia</th>
-                <th>Brutto</th>
-                <th>Netto (Do wypłaty)</th>
-                <th>Akcje</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var wyplata in Model.Wyplaty)
+        <div class="info-grid">
+            <div class="info-item">
+                <div class="info-label">📞 Telefon</div>
+                <div class="info-value">@(Model.Telefon ?? "Brak danych")</div>
+            </div>
+
+            <div class="info-item">
+                <div class="info-label">🏦 Numer konta bankowego</div>
+                <div class="info-value">@(Model.NumerKontaBankowego ?? "Brak danych")</div>
+            </div>
+        </div>
+
+        <div class="section-title">Adres zamieszkania</div>
+
+        <div class="address-card">
+            @if (Model.AdresZamieszkania != null)
             {
-                <tr>
-                    <td>
-                        <strong>@wyplata.Miesiac / @wyplata.Rok</strong>
-                    </td>
-                    <td>@wyplata.DataGenerowania.ToShortDateString()</td>
-                    <td>@wyplata.Brutto.ToString("C")</td>
-                    <td class="text-success fw-bold">@wyplata.Netto.ToString("C")</td>
-                    <td>
-                        <a asp-controller="Wyplaty" asp-action="Details" asp-route-id="@wyplata.Id" class="btn btn-sm btn-outline-primary">
-                            📄 Podgląd
-                        </a>
-
-                        <a asp-controller="Wyplaty" asp-action="Drukuj" asp-route-id="@wyplata.Id" class="btn btn-sm btn-dark" target="_blank">
-                            🖨️ Drukuj
-                        </a>
-                    </td>
-                </tr>
+                <div class="address-text">
+                    <strong>📍 Ulica:</strong> @Model.AdresZamieszkania.Ulica @Model.AdresZamieszkania.NumerDomu@(Model.AdresZamieszkania.NumerLokalu != null ? "/" + Model.AdresZamieszkania.NumerLokalu : "")<br />
+                    <strong>🏙️ Miejscowość:</strong> @Model.AdresZamieszkania.KodPocztowy.Kod @Model.AdresZamieszkania.KodPocztowy.Miejscowosc
+                </div>
             }
-        </tbody>
-    </table>
-}
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+            else
+            {
+                <div class="address-text" style="color: #868e96; font-style: italic;">
+                    Brak danych adresowych
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<div class="salary-table-card">
+    <div class="salary-table-header">
+        <h3>💰 Historia wypłat</h3>
+    </div>
+
+    @if (Model.Wyplaty.Count == 0)
+    {
+        <div class="empty-state">
+            <div class="empty-state-icon">📊</div>
+            <h4>Brak wypłat</h4>
+            <p>Ten pracownik nie ma jeszcze zatwierdzonych wypłat w systemie</p>
+        </div>
+    }
+    else
+    {
+        <table class="table-custom">
+            <thead>
+                <tr>
+                    <th>Okres</th>
+                    <th>Data utworzenia</th>
+                    <th>Kwota brutto</th>
+                    <th>Do wypłaty (netto)</th>
+                    <th style="text-align: right;">Akcje</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var wyplata in Model.Wyplaty)
+                {
+                    <tr>
+                        <td>
+                            <span class="period-badge">@wyplata.Miesiac / @wyplata.Rok</span>
+                        </td>
+                        <td>@wyplata.DataGenerowania.ToString("dd.MM.yyyy")</td>
+                        <td class="amount-brutto">@wyplata.Brutto.ToString("C")</td>
+                        <td class="amount-netto">@wyplata.Netto.ToString("C")</td>
+                        <td>
+                            <div class="action-buttons" style="justify-content: flex-end;">
+                                <a asp-controller="Wyplaty" asp-action="Details" asp-route-id="@wyplata.Id" class="btn-action btn-view">
+                                    📄 Podgląd
+                                </a>
+                                <a asp-controller="Wyplaty" asp-action="Drukuj" asp-route-id="@wyplata.Id" class="btn-action btn-print" target="_blank">
+                                    🖨️ Drukuj
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
 </div>

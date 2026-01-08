@@ -1,89 +1,289 @@
 ﻿@model IEnumerable<SystemKadrowy.Core.Domain.Umowa>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Lista Umów";
 }
 
-<h1>Index</h1>
+<style>
+    /* 1. Nagłówek (Spójny z resztą systemu - Niebiesko-Fioletowy) */
+    .page-header {
+        background: linear-gradient(135deg, #4dabf7 0%, #339af0 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 6px rgba(51, 154, 240, 0.3);
+    }
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Pracownik)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.TypUmowy)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Stanowisko)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.StawkaBrutto)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.DataRozpoczecia)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.DataZakonczenia)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.CzyKosztyPodwyzszone)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.CzyUlgaPodatkowa)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.CzyStudent)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.CzyDobrowolneChorobowe)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Pracownik.Email)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.TypUmowy)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Stanowisko)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.StawkaBrutto)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.DataRozpoczecia)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.DataZakonczenia)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CzyKosztyPodwyzszone)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CzyUlgaPodatkowa)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CzyStudent)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CzyDobrowolneChorobowe)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+        .page-header h1 {
+            margin: 0 0 0.5rem 0;
+            font-size: 2rem;
+            font-weight: 600;
+        }
+
+        .page-header p {
+            margin: 0;
+            opacity: 0.9;
+        }
+
+    /* 2. Pasek akcji */
+    .action-bar {
+        display: flex;
+        justify-content: flex-end;
+        margin-bottom: 1.5rem;
+    }
+
+    .btn-primary-custom {
+        background: #339af0;
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        border: none;
+        box-shadow: 0 2px 4px rgba(51, 154, 240, 0.3);
+    }
+
+        .btn-primary-custom:hover {
+            background: #228be6;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(51, 154, 240, 0.4);
+            color: white;
+        }
+
+    /* 3. Tabela */
+    .card-table {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        overflow: hidden;
+    }
+
+    .table-custom {
+        margin: 0;
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+        .table-custom thead {
+            background: #f8f9fa;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+            .table-custom thead th {
+                padding: 1rem 1.5rem;
+                font-weight: 600;
+                color: #495057;
+                font-size: 0.875rem;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                border: none;
+            }
+
+        .table-custom tbody tr {
+            border-bottom: 1px solid #f1f3f5;
+            transition: background-color 0.2s ease;
+        }
+
+            .table-custom tbody tr:hover {
+                background-color: #f8f9fa;
+            }
+
+        .table-custom tbody td {
+            padding: 1rem 1.5rem;
+            vertical-align: middle;
+            color: #495057;
+            border: none;
+        }
+
+    /* 4. Elementy w tabeli */
+    .employee-info {
+        font-weight: 600;
+        color: #212529;
+        display: block;
+    }
+
+    .position-info {
+        color: #495057;
+        font-weight: 500;
+    }
+
+    .contract-type-badge {
+        display: inline-block;
+        padding: 0.35rem 0.75rem;
+        border-radius: 50px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        background: #e7f5ff;
+        color: #1c7ed6;
+    }
+
+    .salary-amount {
+        font-weight: 700;
+        color: #2b8a3e;
+        font-family: 'Consolas', monospace; /* Lekki akcent techniczny dla liczb */
+    }
+
+    .date-range {
+        font-size: 0.9rem;
+        color: #868e96;
+    }
+
+        .date-range span {
+            color: #495057;
+            font-weight: 500;
+        }
+
+    /* 5. Przyciski akcji */
+    .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+        justify-content: flex-end;
+    }
+
+    .btn-action {
+        padding: 0.4rem 0.8rem;
+        border-radius: 6px;
+        text-decoration: none;
+        font-size: 0.875rem;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        border: 1px solid transparent;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    .btn-edit {
+        color: #339af0;
+        border-color: #339af0;
+        background: transparent;
+    }
+
+        .btn-edit:hover {
+            background: #339af0;
+            color: white;
+        }
+
+    .btn-details {
+        color: #868e96;
+        border-color: #dee2e6;
+        background: transparent;
+    }
+
+        .btn-details:hover {
+            background: #868e96;
+            color: white;
+            border-color: #868e96;
+        }
+
+    .btn-delete {
+        color: #fa5252;
+        border-color: #fa5252;
+        background: transparent;
+    }
+
+        .btn-delete:hover {
+            background: #fa5252;
+            color: white;
+        }
+
+    /* 6. Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: #868e96;
+    }
+
+        .empty-state svg {
+            width: 64px;
+            height: 64px;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+</style>
+
+<div class="page-header">
+    <h1>📄 Umowy</h1>
+    <p>Zarządzaj umowami i warunkami zatrudnienia</p>
+</div>
+
+<div class="action-bar">
+    <a asp-action="Create" class="btn-primary-custom">
+        <span>+</span> Dodaj umowę
+    </a>
+</div>
+
+<div class="card-table">
+    @if (Model.Any())
+    {
+        <table class="table-custom">
+            <thead>
+                <tr>
+                    <th>Pracownik</th>
+                    <th>Stanowisko i Typ</th>
+                    <th>Okres obowiązywania</th>
+                    <th>Stawka Brutto</th>
+                    <th style="text-align: right;">Akcje</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>
+                            <span class="employee-info">
+                                @(item.Pracownik != null ? item.Pracownik.Email : "Brak przypisania")
+                            </span>
+                        </td>
+                        <td>
+                            <div class="position-info">@Html.DisplayFor(modelItem => item.Stanowisko)</div>
+                            <div style="margin-top: 0.25rem;">
+                                <span class="contract-type-badge">
+                                    @Html.DisplayFor(modelItem => item.TypUmowy)
+                                </span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="date-range">
+                                Od: <span>@item.DataRozpoczecia.ToString("dd.MM.yyyy")</span><br />
+                                Do: <span>@(item.DataZakonczenia.HasValue? item.DataZakonczenia.Value.ToString("dd.MM.yyyy") : "Nieokreślony")</span>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="salary-amount">@item.StawkaBrutto.ToString("C")</span>
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn-action btn-edit">
+                                    ✏️ Edytuj
+                                </a>
+                                <a asp-action="Details" asp-route-id="@item.Id" class="btn-action btn-details">
+                                    👁️ Szczegóły
+                                </a>
+                                <a asp-action="Delete" asp-route-id="@item.Id" class="btn-action btn-delete">
+                                    🗑️ Usuń
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <div class="empty-state">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            <h3>Brak umów</h3>
+            <p>Nie dodano jeszcze żadnych umów do systemu.</p>
+        </div>
+    }
+</div>

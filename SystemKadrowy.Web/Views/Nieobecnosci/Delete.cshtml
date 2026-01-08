@@ -1,69 +1,270 @@
 ﻿@model SystemKadrowy.Core.Domain.Nieobecnosc
 
 @{
-    ViewData["Title"] = "Delete";
+    ViewData["Title"] = "Usuń nieobecność";
 }
 
-<h1>Delete</h1>
+<style>
+    /* 1. Nagłówek w stylu "Danger" (Czerwony) */
+    .page-header {
+        background: linear-gradient(135deg, #fa5252 0%, #e03131 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 6px rgba(250, 82, 82, 0.3);
+    }
 
-<h3>Are you sure you want to delete this?</h3>
-<div>
-    <h4>Nieobecnosc</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Pracownik)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Pracownik.Email)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.DataOd)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.DataOd)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.DataDo)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.DataDo)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Typ)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Typ)
-        </dd>
-        <dt class="col-sm-2">
-            Wymiar czasu
-        </dt>
-        <dd class="col-sm-10">
-            @if (Model.LiczbaGodzin > 0)
-            {
-                <span class="fs-5 fw-bold text-primary">@Model.LiczbaGodzin.ToString("0.##") godz.</span>
-                <br />
-                <small class="text-muted">(Nieobecność godzinowa - część dnia)</small>
-            }
-            else
-            {
-                <span class="fs-5 fw-bold">@Model.LiczbaDniRoboczych dni</span>
-                <br />
-                <small class="text-muted">(Nieobecność całodzienna)</small>
-            }
-        </dd>
-    </dl>
+        .page-header h1 {
+            margin: 0 0 0.5rem 0;
+            font-size: 2rem;
+            font-weight: 600;
+        }
+
+        .page-header p {
+            margin: 0;
+            opacity: 0.9;
+            font-size: 0.95rem;
+        }
+
+    /* 2. Link powrotu */
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 500;
+        margin-bottom: 1.5rem;
+        transition: all 0.2s ease;
+    }
+
+        .back-link:hover {
+            color: #5568d3;
+            gap: 0.7rem;
+        }
+
+    /* 3. Karta ostrzegawcza */
+    .warning-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        overflow: hidden;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .warning-banner {
+        background: linear-gradient(135deg, #fff3cd 0%, #ffe69c 100%);
+        padding: 1.5rem;
+        border-bottom: 3px solid #ffc107;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .warning-icon {
+        font-size: 3rem;
+        flex-shrink: 0;
+    }
+
+    .warning-text h3 {
+        margin: 0 0 0.5rem 0;
+        color: #856404;
+        font-size: 1.5rem;
+        font-weight: 700;
+    }
+
+    .warning-text p {
+        margin: 0;
+        color: #856404;
+        font-size: 1rem;
+    }
+
+    /* 4. Szczegóły */
+    .details-section {
+        padding: 2rem;
+    }
+
+    .section-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid #f1f3f5;
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .info-row {
+        display: flex;
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+        border-left: 4px solid #fa5252; /* Czerwony akcent */
+    }
+
+    .info-label {
+        flex: 0 0 180px; /* Nieco szerzej dla długich etykiet */
+        font-weight: 600;
+        color: #495057;
+        font-size: 0.9rem;
+    }
+
+    .info-value {
+        flex: 1;
+        color: #212529;
+        font-size: 1rem;
+        font-weight: 500;
+    }
+
+    /* 5. Przyciski akcji */
+    .action-section {
+        padding: 2rem;
+        background: #f8f9fa;
+        border-top: 2px solid #e9ecef;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+    }
+
+    .btn-delete {
+        background: linear-gradient(135deg, #fa5252 0%, #e03131 100%);
+        color: white;
+        padding: 0.875rem 2.5rem;
+        border-radius: 8px;
+        border: none;
+        font-weight: 600;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 4px rgba(250, 82, 82, 0.3);
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+        .btn-delete:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(250, 82, 82, 0.4);
+            background: linear-gradient(135deg, #e03131 0%, #c92a2a 100%);
+        }
+
+    .btn-cancel {
+        background: white;
+        color: #495057;
+        padding: 0.875rem 2.5rem;
+        border-radius: 8px;
+        border: 2px solid #dee2e6;
+        font-weight: 600;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        cursor: pointer;
+    }
+
+        .btn-cancel:hover {
+            background: #f8f9fa;
+            border-color: #adb5bd;
+            color: #495057;
+            transform: translateY(-2px);
+        }
+</style>
+
+@if (Context.Request.Headers["X-Requested-With"] != "XMLHttpRequest")
+{
+    <a asp-action="Index" class="back-link">
+        ← Powrót do listy
+    </a>
+}
+
+<div class="page-header">
+    <h1>⚠️ Usuwanie nieobecności</h1>
+    <p>Potwierdź usunięcie wpisu z ewidencji</p>
+</div>
+
+<div class="warning-card">
+    <div class="warning-banner">
+        <div class="warning-icon">⚠️</div>
+        <div class="warning-text">
+            <h3>Czy na pewno chcesz usunąć ten wpis?</h3>
+            <p>Ta operacja jest nieodwracalna.</p>
+        </div>
+    </div>
+
+    <div class="details-section">
+        <div class="section-title">Szczegóły usuwanej nieobecności</div>
+
+        <div class="info-grid">
+            <div class="info-row">
+                <div class="info-label">@Html.DisplayNameFor(model => model.Pracownik)</div>
+                <div class="info-value">@Html.DisplayFor(model => model.Pracownik.Email)</div>
+            </div>
+
+            <div class="info-row">
+                <div class="info-label">Rodzaj</div>
+                <div class="info-value">@Html.DisplayFor(model => model.Typ)</div>
+            </div>
+
+            <div class="info-row">
+                <div class="info-label">Okres</div>
+                <div class="info-value">
+                    Od <strong>@Html.DisplayFor(model => model.DataOd)</strong>
+                    do <strong>@Html.DisplayFor(model => model.DataDo)</strong>
+                </div>
+            </div>
+
+            <div class="info-row">
+                <div class="info-label">Wymiar czasu</div>
+                <div class="info-value">
+                    @if (Model.LiczbaGodzin > 0)
+                    {
+                        <span style="color: #0d6efd; font-weight: 700;">@Model.LiczbaGodzin.ToString("0.##") godz.</span>
+                        <div style="font-size: 0.85rem; color: #6c757d; margin-top: 0.2rem;">(Nieobecność godzinowa - część dnia)</div>
+                    }
+                    else
+                    {
+                        <span style="font-weight: 700;">@Model.LiczbaDniRoboczych dni</span>
+                        <div style="font-size: 0.85rem; color: #6c757d; margin-top: 0.2rem;">(Nieobecność całodzienna)</div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
 
     <form asp-action="Delete">
         <input type="hidden" asp-for="Id" />
-        <input type="submit" value="Delete" class="btn btn-danger" /> |
-        @if (Context.Request.Headers["X-Requested-With"] != "XMLHttpRequest")
-        {
-            <a asp-action="Index">Back to List</a>
-        }
-        else
-        {
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anuluj</button>
-        }
+
+        <div class="action-section">
+            <div class="action-buttons">
+                @if (Context.Request.Headers["X-Requested-With"] != "XMLHttpRequest")
+                {
+                    <a asp-action="Index" class="btn-cancel">
+                        Anuluj
+                    </a>
+                }
+                else
+                {
+                    <button type="button" class="btn-cancel" data-bs-dismiss="modal">
+                        Anuluj
+                    </button>
+                }
+
+                <button type="submit" class="btn-delete">
+                    🗑️ Usuń nieobecność
+                </button>
+            </div>
+        </div>
     </form>
 </div>

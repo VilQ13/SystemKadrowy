@@ -1,82 +1,274 @@
 ﻿@model IEnumerable<SystemKadrowy.Core.Domain.Nieobecnosc>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Lista nieobecności";
 }
 
-<h1>Index</h1>
+<style>
+    /* 1. Nagłówek strony */
+    .page-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Pracownik)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.DataOd)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.DataDo)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Typ)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.LiczbaDniRoboczych)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Pracownik.Email)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.DataOd)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.DataDo)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Typ)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.LiczbaDniRoboczych)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                    <button class="btn btn-info btn-sm text-white btn-modal-action"
-                            data-url="@Url.Action("Details", new { id = item.Id })"
-                            data-title="Szczegóły Nieobecności">
-                        👁️ Podgląd
-                    </button>
+        .page-header h1 {
+            margin: 0 0 0.5rem 0;
+            font-size: 2rem;
+            font-weight: 600;
+        }
 
-                    <button class="btn btn-danger btn-sm btn-modal-action"
-                            data-url="@Url.Action("Delete", new { id = item.Id })"
-                            data-title="Potwierdź Usunięcie">
-                        🗑️ Usuń
-                    </button>
-                @* <a asp-action="Details" asp-route-id="@item.Id">Details</a> | *@
-                @* <a asp-action="Delete" asp-route-id="@item.Id">Delete</a> *@
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+        .page-header p {
+            margin: 0;
+            opacity: 0.9;
+        }
+
+    /* 2. Pasek akcji (Przycisk Dodaj) */
+    .action-bar {
+        display: flex;
+        justify-content: flex-end; /* Przycisk do prawej */
+        margin-bottom: 1.5rem;
+    }
+
+    .btn-primary-custom {
+        background: #667eea;
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        border: none;
+        box-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
+    }
+
+        .btn-primary-custom:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(102, 126, 234, 0.4);
+            color: white;
+        }
+
+    /* 3. Tabela i Karta */
+    .card-table {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        overflow: hidden;
+    }
+
+    .table-custom {
+        margin: 0;
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+        .table-custom thead {
+            background: #f8f9fa;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+            .table-custom thead th {
+                padding: 1rem;
+                font-weight: 600;
+                color: #495057;
+                font-size: 0.875rem;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                border: none;
+            }
+
+        .table-custom tbody tr {
+            border-bottom: 1px solid #f1f3f5;
+            transition: background-color 0.2s ease;
+        }
+
+            .table-custom tbody tr:hover {
+                background-color: #f8f9fa;
+            }
+
+            .table-custom tbody tr:last-child {
+                border-bottom: none;
+            }
+
+        .table-custom tbody td {
+            padding: 1rem;
+            vertical-align: middle;
+            color: #495057;
+            border: none;
+        }
+
+    /* 4. Przyciski akcji w tabeli */
+    .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+    }
+
+    .btn-action {
+        padding: 0.4rem 0.8rem;
+        border-radius: 6px;
+        text-decoration: none;
+        font-size: 0.875rem;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        border: 1px solid transparent;
+        display: inline-block;
+        cursor: pointer; /* Ważne dla buttonów */
+    }
+
+    /* Styl Edycji (Niebieski) */
+    .btn-edit {
+        color: #667eea;
+        border-color: #667eea;
+        background: transparent;
+    }
+
+        .btn-edit:hover {
+            background: #667eea;
+            color: white;
+        }
+
+    /* Styl Szczegółów (Szary) */
+    .btn-details {
+        color: #868e96;
+        border-color: #dee2e6;
+        background: transparent;
+    }
+
+        .btn-details:hover {
+            background: #868e96;
+            color: white;
+            border-color: #868e96;
+        }
+
+    /* Styl Usuwania (Czerwony) */
+    .btn-delete {
+        color: #fa5252;
+        border-color: #fa5252;
+        background: transparent;
+    }
+
+        .btn-delete:hover {
+            background: #fa5252;
+            color: white;
+        }
+
+    /* 5. Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: #868e96;
+    }
+
+        .empty-state svg {
+            width: 64px;
+            height: 64px;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+</style>
+
+<div class="page-header">
+    <h1>📅 Ewidencja Nieobecności</h1>
+    <p>Zarządzaj urlopami i zwolnieniami pracowników</p>
+</div>
+
+<div class="action-bar">
+    <a asp-action="Create" class="btn-primary-custom">
+        <span>+</span> Rejestruj nową
+    </a>
+</div>
+
+<div class="card-table">
+    @if (Model.Any())
+    {
+        <table class="table-custom">
+            <thead>
+                <tr>
+                    <th>@Html.DisplayNameFor(model => model.Pracownik)</th>
+                    <th>@Html.DisplayNameFor(model => model.DataOd)</th>
+                    <th>@Html.DisplayNameFor(model => model.DataDo)</th>
+                    <th>@Html.DisplayNameFor(model => model.Typ)</th>
+                    <th>@Html.DisplayNameFor(model => model.LiczbaDniRoboczych)</th>
+                    <th style="text-align: right;">Akcje</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>
+                            <strong>@Html.DisplayFor(modelItem => item.Pracownik.Email)</strong>
+                        </td>
+                        <td>@item.DataOd.ToString("dd.MM.yyyy")</td>
+                        <td>@item.DataDo.ToString("dd.MM.yyyy")</td>
+                        <td>
+                            <span style="background: #e7f5ff; color: #1c7ed6; padding: 4px 8px; border-radius: 4px; font-weight: 500; font-size: 0.85rem;">
+                                @Html.DisplayFor(modelItem => item.Typ)
+                            </span>
+                        </td>
+                        <td>
+                            @if (item.LiczbaGodzin > 0)
+                            {
+                                <span>@item.LiczbaGodzin.ToString("0.##") h</span>
+                            }
+                            else
+                            {
+                                <span>@item.LiczbaDniRoboczych dni</span>
+                            }
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn-action btn-edit">
+                                    ✏️ Edytuj
+                                </a>
+
+                                <button class="btn-action btn-details btn-modal-action"
+                                        data-url="@Url.Action("Details", new { id = item.Id })"
+                                        data-title="Szczegóły Nieobecności">
+                                    👁️ Podgląd
+                                </button>
+
+                                <button class="btn-action btn-delete btn-modal-action"
+                                        data-url="@Url.Action("Delete", new { id = item.Id })"
+                                        data-title="Potwierdź Usunięcie">
+                                    🗑️ Usuń
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <div class="empty-state">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            <h3>Brak wpisów</h3>
+            <p>Nie zarejestrowano jeszcze żadnych nieobecności w systemie.</p>
+        </div>
+    }
+</div>
 
 <div class="modal fade" id="modalUniwersalny" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
+        <div class="modal-content" style="border-radius: 12px; border: none; overflow: hidden;">
             <div class="modal-header bg-light">
-                <h5 class="modal-title" id="modalTytul">Akcja</h5>
+                <h5 class="modal-title" id="modalTytul" style="font-weight: 600;">Akcja</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body" id="modalTresc">
+            <div class="modal-body" id="modalTresc" style="padding: 0;">
             </div>
         </div>
     </div>
@@ -102,7 +294,7 @@
                 modalTitle.text(tytul);
 
                 // Czyścimy treść i pokazujemy spinner
-                modalBody.html('<div class="text-center p-4"><div class="spinner-border text-primary"></div></div>');
+                modalBody.html('<div class="text-center p-5"><div class="spinner-border text-primary" role="status"></div><div class="mt-2 text-muted">Ładowanie...</div></div>');
 
                 // Otwieramy
                 myModal.show();
@@ -115,7 +307,7 @@
                         modalBody.html(response);
                     },
                     error: function () {
-                        modalBody.html('<p class="text-danger">Błąd ładowania.</p>');
+                        modalBody.html('<div class="p-4 text-center text-danger">Wystąpił błąd podczas ładowania danych.</div>');
                     }
                 });
             });
