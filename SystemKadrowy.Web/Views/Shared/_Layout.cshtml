@@ -38,6 +38,10 @@
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-controller="Nieobecnosci" asp-action="Index">Nieobecności</a>
                             </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link nav-link text-dark" asp-controller="Umowy" asp-action="Index">Umowy</a>
+                            </li>
                         }
 
                         @if (User.IsInRole("Admin") || User.IsInRole("Place"))
