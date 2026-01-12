@@ -1,62 +1,254 @@
 ﻿@model IEnumerable<SystemKadrowy.Core.Domain.Pracownik>
-
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Pracownicy";
 }
 
-<h1>Index</h1>
+<style>
+    .page-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Imie)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Nazwisko)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.PESEL)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.DataUrodzenia)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Email)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Imie)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Nazwisko)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.PESEL)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.DataUrodzenia)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Email)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a> |
+        .page-header h1 {
+            margin: 0 0 0.5rem 0;
+            font-size: 2rem;
+            font-weight: 600;
+        }
 
-                <a asp-controller="Umowy" asp-action="Index" class="btn btn-sm btn-info text-white">Umowy</a>
-                <a asp-controller="Wyplaty" asp-action="Oblicz" asp-route-id="@item.Id" class="btn btn-sm btn-success">Wypłata</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+        .page-header p {
+            margin: 0;
+            opacity: 0.9;
+        }
+
+    .action-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .btn-primary-custom {
+        background: #667eea;
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        border: none;
+        box-shadow: 0 2px 4px rgba(102, 126, 234, 0.3);
+    }
+
+        .btn-primary-custom:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(102, 126, 234, 0.4);
+            color: white;
+        }
+
+    .card-table {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        overflow: hidden;
+    }
+
+    .table-custom {
+        margin: 0;
+        width: 100%;
+    }
+
+        .table-custom thead {
+            background: #f8f9fa;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+            .table-custom thead th {
+                padding: 1rem;
+                font-weight: 600;
+                color: #495057;
+                font-size: 0.875rem;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                border: none;
+            }
+
+        .table-custom tbody tr {
+            border-bottom: 1px solid #f1f3f5;
+            transition: background-color 0.2s ease;
+        }
+
+            .table-custom tbody tr:hover {
+                background-color: #f8f9fa;
+            }
+
+            .table-custom tbody tr:last-child {
+                border-bottom: none;
+            }
+
+        .table-custom tbody td {
+            padding: 1rem;
+            vertical-align: middle;
+            color: #495057;
+            border: none;
+        }
+
+    .employee-name {
+        font-weight: 600;
+        color: #212529;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .btn-action {
+        padding: 0.4rem 0.8rem;
+        border-radius: 6px;
+        text-decoration: none;
+        font-size: 0.875rem;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        border: 1px solid transparent;
+        display: inline-block;
+    }
+
+    .btn-edit {
+        color: #667eea;
+        border-color: #667eea;
+        background: transparent;
+    }
+
+        .btn-edit:hover {
+            background: #667eea;
+            color: white;
+        }
+
+    .btn-details {
+        color: #868e96;
+        border-color: #dee2e6;
+        background: transparent;
+    }
+
+        .btn-details:hover {
+            background: #868e96;
+            color: white;
+            border-color: #868e96;
+        }
+
+    .btn-delete {
+        color: #fa5252;
+        border-color: #fa5252;
+        background: transparent;
+    }
+
+        .btn-delete:hover {
+            background: #fa5252;
+            color: white;
+        }
+
+    .btn-contracts {
+        background: #4dabf7;
+        color: white;
+        border: none;
+    }
+
+        .btn-contracts:hover {
+            background: #339af0;
+            color: white;
+        }
+
+    .btn-salary {
+        background: #51cf66;
+        color: white;
+        border: none;
+    }
+
+        .btn-salary:hover {
+            background: #40c057;
+            color: white;
+        }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: #868e96;
+    }
+
+        .empty-state svg {
+            width: 64px;
+            height: 64px;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+</style>
+
+<div class="page-header">
+    <h1>Pracownicy</h1>
+    <p>Zarządzaj listą pracowników w systemie kadrowym</p>
+</div>
+
+<div class="action-bar">
+    <div></div>
+    <a asp-action="Create" class="btn-primary-custom">
+        <span>+</span> Dodaj pracownika
+    </a>
+</div>
+
+<div class="card-table">
+    @if (Model.Any())
+    {
+        <table class="table-custom">
+            <thead>
+                <tr>
+                    <th>@Html.DisplayNameFor(model => model.Imie)</th>
+                    <th>@Html.DisplayNameFor(model => model.Nazwisko)</th>
+                    <th>@Html.DisplayNameFor(model => model.PESEL)</th>
+                    <th>@Html.DisplayNameFor(model => model.DataUrodzenia)</th>
+                    <th>@Html.DisplayNameFor(model => model.Email)</th>
+                    <th style="text-align: right;">Akcje</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td class="employee-name">@Html.DisplayFor(modelItem => item.Imie)</td>
+                        <td class="employee-name">@Html.DisplayFor(modelItem => item.Nazwisko)</td>
+                        <td>@Html.DisplayFor(modelItem => item.PESEL)</td>
+                        <td>@Html.DisplayFor(modelItem => item.DataUrodzenia)</td>
+                        <td>@Html.DisplayFor(modelItem => item.Email)</td>
+                        <td>
+                            <div class="action-buttons" style="justify-content: flex-end;">
+                                <a asp-action="Edit" asp-route-id="@item.Id" class="btn-action btn-edit">Edytuj</a>
+                                <a asp-action="Details" asp-route-id="@item.Id" class="btn-action btn-details">Szczegóły</a>
+                                <a asp-action="Delete" asp-route-id="@item.Id" class="btn-action btn-delete">Usuń</a>
+                                <a asp-controller="Umowy" asp-action="Index" class="btn-action btn-contracts">Umowy</a>
+                                <a asp-controller="Wyplaty" asp-action="Oblicz" asp-route-id="@item.Id" class="btn-action btn-salary">Wypłata</a>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <div class="empty-state">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
+            <h3>Brak pracowników</h3>
+            <p>Rozpocznij od dodania pierwszego pracownika do systemu</p>
+        </div>
+    }
+</div>

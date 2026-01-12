@@ -11,14 +11,13 @@ namespace SystemKadrowy.Core.Domain
     {
         public int Id { get; set; }
 
-        // Klucz obcy - czyja to umowa?
         public int PracownikId { get; set; }
-        public Pracownik? Pracownik { get; set; } // Nawigacja dla Entity Framework
+        public Pracownik? Pracownik { get; set; } 
 
         public TypUmowy TypUmowy { get; set; }
         public string Stanowisko { get; set; } = string.Empty;
 
-        // Finanse (Używamy decimal!)
+        // Finanse
         public decimal StawkaBrutto { get; set; }
         // Czy 5000 to "na miesiąc" czy "na godzinę"?
         public SposobWynagradzania SposobWynagradzania { get; set; }

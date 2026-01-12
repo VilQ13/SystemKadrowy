@@ -1,78 +1,305 @@
 ﻿@model SystemKadrowy.Core.Domain.Umowa
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Szczegóły umowy";
 }
 
-<h1>Details</h1>
+<style>
+    .page-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
 
-<div>
-    <h4>Umowa</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Pracownik)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Pracownik.Email)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.TypUmowy)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.TypUmowy)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Stanowisko)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Stanowisko)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.StawkaBrutto)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.StawkaBrutto)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.DataRozpoczecia)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.DataRozpoczecia)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.DataZakonczenia)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.DataZakonczenia)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CzyKosztyPodwyzszone)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CzyKosztyPodwyzszone)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CzyUlgaPodatkowa)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CzyUlgaPodatkowa)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CzyStudent)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CzyStudent)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CzyDobrowolneChorobowe)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CzyDobrowolneChorobowe)
-        </dd>
-    </dl>
+        .page-header h1 {
+            margin: 0 0 0.5rem 0;
+            font-size: 2rem;
+            font-weight: 600;
+        }
+
+        .page-header p {
+            margin: 0;
+            opacity: 0.9;
+            font-size: 0.95rem;
+        }
+
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 500;
+        margin-bottom: 1.5rem;
+        transition: all 0.2s ease;
+    }
+
+        .back-link:hover {
+            color: #5568d3;
+            gap: 0.7rem;
+        }
+
+    .details-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        padding: 2rem;
+        overflow: hidden;
+    }
+
+    .section-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #212529;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid #f1f3f5;
+        margin-top: 1rem;
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .info-item {
+        background: #f8f9fa;
+        padding: 1.25rem;
+        border-radius: 10px;
+        border-left: 4px solid #667eea;
+    }
+
+    .info-label {
+        font-size: 0.85rem;
+        color: #868e96;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.5rem;
+    }
+
+    .info-value {
+        font-size: 1.1rem;
+        color: #212529;
+        font-weight: 500;
+    }
+
+    .salary-value {
+        font-family: 'Consolas', monospace;
+        font-weight: 700;
+        color: #2b8a3e;
+        font-size: 1.2rem;
+    }
+
+    .status-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+
+    .status-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem;
+        border-radius: 8px;
+        background: white;
+        border: 1px solid #dee2e6;
+    }
+
+    .status-label {
+        font-weight: 500;
+        color: #495057;
+        font-size: 0.95rem;
+    }
+
+    .badge-yes {
+        background: #e9f5ec;
+        color: #2b8a3e;
+        padding: 0.25rem 0.75rem;
+        border-radius: 50px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .badge-no {
+        background: #f1f3f5;
+        color: #868e96;
+        padding: 0.25rem 0.75rem;
+        border-radius: 50px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .action-bar {
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #e9ecef;
+        display: flex;
+        gap: 1rem;
+    }
+
+    .btn-edit {
+        background: #667eea;
+        color: white;
+        padding: 0.6rem 1.5rem;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        border: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+        .btn-edit:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            color: white;
+        }
+
+    .btn-secondary-custom {
+        background: white;
+        color: #495057;
+        border: 1px solid #dee2e6;
+        padding: 0.6rem 1.5rem;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.2s ease;
+    }
+
+        .btn-secondary-custom:hover {
+            background: #f8f9fa;
+            border-color: #adb5bd;
+            color: #212529;
+        }
+</style>
+
+@if (Context.Request.Headers["X-Requested-With"] != "XMLHttpRequest")
+{
+    <a asp-action="Index" class="back-link">
+        ← Powrót do listy
+    </a>
+}
+
+<div class="page-header">
+    <h1>📄 Szczegóły umowy</h1>
+    <p>Pełne warunki zatrudnienia pracownika</p>
 </div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+
+<div class="details-card">
+    <div class="section-title" style="margin-top: 0;">Dane podstawowe</div>
+
+    <div class="info-grid">
+        <div class="info-item">
+            <div class="info-label">@Html.DisplayNameFor(model => model.Pracownik)</div>
+            <div class="info-value">
+                👤 @Html.DisplayFor(model => model.Pracownik.Email)
+            </div>
+        </div>
+
+        <div class="info-item">
+            <div class="info-label">@Html.DisplayNameFor(model => model.Stanowisko)</div>
+            <div class="info-value">
+                💼 @Html.DisplayFor(model => model.Stanowisko)
+            </div>
+        </div>
+
+        <div class="info-item">
+            <div class="info-label">@Html.DisplayNameFor(model => model.TypUmowy)</div>
+            <div class="info-value">
+                📄 @Html.DisplayFor(model => model.TypUmowy)
+            </div>
+        </div>
+    </div>
+
+    <div class="section-title">Finanse i Okres</div>
+
+    <div class="info-grid">
+        <div class="info-item">
+            <div class="info-label">@Html.DisplayNameFor(model => model.StawkaBrutto)</div>
+            <div class="info-value salary-value">
+                💰 @Html.DisplayFor(model => model.StawkaBrutto)
+            </div>
+        </div>
+
+        <div class="info-item">
+            <div class="info-label">Okres obowiązywania</div>
+            <div class="info-value">
+                📅 @Model.DataRozpoczecia.ToString("dd.MM.yyyy") —
+                @(Model.DataZakonczenia.HasValue? Model.DataZakonczenia.Value.ToString("dd.MM.yyyy") : "Czas nieokreślony")
+            </div>
+        </div>
+    </div>
+
+    <div class="section-title">Ustawienia płacowe</div>
+
+    <div class="status-grid">
+        <div class="status-item">
+            <span class="status-label">@Html.DisplayNameFor(model => model.CzyKosztyPodwyzszone)</span>
+            @if (Model.CzyKosztyPodwyzszone)
+            {
+                <span class="badge-yes">TAK</span>
+            }
+            else
+            {
+                <span class="badge-no">NIE</span>
+            }
+        </div>
+
+        <div class="status-item">
+            <span class="status-label">@Html.DisplayNameFor(model => model.CzyUlgaPodatkowa)</span>
+            @if (Model.CzyUlgaPodatkowa)
+            {
+                <span class="badge-yes">TAK</span>
+            }
+            else
+            {
+                <span class="badge-no">NIE</span>
+            }
+        </div>
+
+        <div class="status-item">
+            <span class="status-label">@Html.DisplayNameFor(model => model.CzyStudent)</span>
+            @if (Model.CzyStudent)
+            {
+                <span class="badge-yes">TAK</span>
+            }
+            else
+            {
+                <span class="badge-no">NIE</span>
+            }
+        </div>
+
+        <div class="status-item">
+            <span class="status-label">@Html.DisplayNameFor(model => model.CzyDobrowolneChorobowe)</span>
+            @if (Model.CzyDobrowolneChorobowe)
+            {
+                <span class="badge-yes">TAK</span>
+            }
+            else
+            {
+                <span class="badge-no">NIE</span>
+            }
+        </div>
+    </div>
+
+    @if (Context.Request.Headers["X-Requested-With"] != "XMLHttpRequest")
+    {
+        <div class="action-bar">
+            <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn-edit">
+                ✏️ Edytuj
+            </a>
+            <a asp-action="Index" class="btn-secondary-custom">
+                Powrót do listy
+            </a>
+        </div>
+    }
 </div>

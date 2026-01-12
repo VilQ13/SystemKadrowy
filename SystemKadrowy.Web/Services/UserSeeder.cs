@@ -9,7 +9,7 @@ namespace SystemKadrowy.Web.Services
             var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
             var userManager = serviceProvider.GetRequiredService<UserManager<IdentityUser>>();
 
-            // 1. Lista ról do utworzenia
+            // Lista ról do utworzenia
             string[] roleNames = { "Admin", "Kadry", "Place" };
 
             foreach (var roleName in roleNames)
@@ -21,7 +21,7 @@ namespace SystemKadrowy.Web.Services
                 }
             }
 
-            // 2. Tworzymy domyślnego Admina (jeśli nie istnieje)
+            // Tworzymy domyślnego Admina (jeśli nie istnieje)
             var adminEmail = "admin@firma.pl";
             var adminUser = await userManager.FindByEmailAsync(adminEmail);
 

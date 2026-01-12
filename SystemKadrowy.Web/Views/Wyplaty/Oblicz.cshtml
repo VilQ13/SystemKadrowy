@@ -3,161 +3,394 @@
 
 @{
     var p = ViewBag.Pracownik as SystemKadrowy.Core.Domain.Pracownik;
-    ViewData["Title"] = "Pasek Wypłaty";
+    ViewData["Title"] = "Kalkulator Wypłaty";
 }
 
-<div class="card mt-4">
-    <div class="card-header bg-primary text-white">
-        <div class="d-flex justify-content-between align-items-center">
-            <h3>Pasek Wynagrodzeń: @p.Imie @p.Nazwisko</h3>
-            <h4 class="bg-white text-primary px-3 py-1 rounded">
-                Okres: @ViewBag.Miesiac / @ViewBag.Rok
-            </h4>
-        </div>
+<style>
+    .page-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 6px rgba(102, 126, 234, 0.3);
+    }
+
+        .page-header h1 {
+            margin: 0 0 0.5rem 0;
+            font-size: 2rem;
+            font-weight: 600;
+        }
+
+        .page-header .period-label {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.2rem 0.8rem;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 500;
+        margin-bottom: 1.5rem;
+        transition: all 0.2s ease;
+    }
+
+        .back-link:hover {
+            color: #5568d3;
+            gap: 0.7rem;
+        }
+
+    .calculator-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        border: 1px solid #dee2e6;
+        border-top: 4px solid #fcc419; 
+    }
+
+    .calc-title {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .form-label-calc {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 0.4rem;
+    }
+
+    .payslip-preview {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        overflow: hidden;
+        border: 1px solid #e9ecef;
+    }
+
+    .preview-header {
+        background: #f8f9fa;
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid #e9ecef;
+        font-weight: 600;
+        color: #495057;
+    }
+
+    .finance-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    @@media (max-width: 768px) {
+        .finance-grid
+
+    {
+        grid-template-columns: 1fr;
+    }
+
+    }
+
+    .finance-col {
+        padding: 1.5rem;
+    }
+
+        .finance-col:first-child {
+            border-right: 1px solid #f9f9f9;
+            background: #fff;
+        }
+
+        .finance-col:last-child {
+            background: #fdfdfe;
+        }
+
+    .col-header {
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        color: #adb5bd;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        letter-spacing: 0.5px;
+    }
+
+    .calc-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+        font-size: 0.95rem;
+        padding-bottom: 0.25rem;
+        border-bottom: 1px dashed #f1f3f5;
+    }
+
+        .calc-row:last-child {
+            border-bottom: none;
+        }
+
+    .money {
+        font-family: 'Consolas', monospace;
+        font-weight: 600;
+    }
+
+    .text-pos {
+        color: #2b8a3e;
+    }
+
+    .text-neg {
+        color: #e03131;
+    }
+
+    .text-neu {
+        color: #495057;
+    }
+
+    .net-section {
+        background: #e9f5ec;
+        padding: 1.5rem;
+        text-align: center;
+        border-top: 1px solid #d3f9d8;
+    }
+
+    .net-amount {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #2b8a3e;
+        line-height: 1;
+    }
+
+    .alert-ai {
+        background: #fff5f5;
+        border: 1px solid #ffc9c9;
+        border-left: 4px solid #fa5252;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 2rem;
+        display: flex;
+        gap: 1rem;
+        align-items: flex-start;
+    }
+
+    .btn-recalc {
+        background: #fcc419;
+        color: #212529;
+        border: none;
+        font-weight: 600;
+        width: 100%;
+        margin-top: 1.8rem;
+    }
+
+        .btn-recalc:hover {
+            background: #fab005;
+        }
+
+    .btn-confirm {
+        background: linear-gradient(135deg, #51cf66 0%, #40c057 100%);
+        color: white;
+        font-weight: 600;
+        padding: 0.8rem 2rem;
+        border: none;
+        border-radius: 8px;
+        font-size: 1.1rem;
+        box-shadow: 0 4px 6px rgba(81, 207, 102, 0.3);
+        transition: transform 0.2s;
+    }
+
+        .btn-confirm:hover {
+            transform: translateY(-2px);
+        }
+
+</style>
+
+<a asp-action="Index" class="back-link">
+    ← Anuluj i wróć
+</a>
+
+<div class="page-header">
+    <h1>🧮 Kalkulator Płac</h1>
+    <div class="d-flex align-items-center gap-3 mt-2">
+        <span class="period-label">Pracownik: @p.Imie @p.Nazwisko</span>
+        <span class="period-label">Okres: @ViewBag.Miesiac / @ViewBag.Rok</span>
     </div>
-    <div class="card mb-4 bg-light">
-        <div class="card-body">
-            <form method="get" asp-action="Oblicz" class="row align-items-end">
-                <input type="hidden" name="id" value="@ViewBag.Pracownik.Id" />
-                <input type="hidden" name="rok" value="@ViewBag.Rok" />
-                <input type="hidden" name="miesiac" value="@ViewBag.Miesiac" />
+</div>
 
-                <div class="col-md-3">
-                    <label class="form-label fw-bold">Premia / Dodatki (Brutto)</label>
-                    <div class="input-group">
-                        <input type="number" step="0.01" name="premia" class="form-control" value="@ViewBag.WpisanaPremia" />
-                        <span class="input-group-text">PLN</span>
-                    </div>
+<div class="calculator-card">
+    <div class="calc-title">
+        ⚙️ Parametry wejściowe
+    </div>
+    <form method="get" asp-action="Oblicz">
+        <input type="hidden" name="id" value="@ViewBag.Pracownik.Id" />
+        <input type="hidden" name="rok" value="@ViewBag.Rok" />
+        <input type="hidden" name="miesiac" value="@ViewBag.Miesiac" />
+
+        <div class="row">
+            <div class="col-md-3">
+                <label class="form-label-calc">Premia / Dodatki (Brutto)</label>
+                <div class="input-group">
+                    <input type="number" step="0.01" name="premia" class="form-control" value="@ViewBag.WpisanaPremia" placeholder="0.00" />
+                    <span class="input-group-text">PLN</span>
                 </div>
+            </div>
 
+            <div class="col-md-3">
                 @if (ViewBag.Pracownik.Umowy[0].SposobWynagradzania.ToString() == "StawkaGodzinowa")
                 {
-                    <div class="col-md-3">
-                        <label class="form-label fw-bold text-primary">Godziny Pracy</label>
-                        <div class="input-group">
-                            <input type="number" step="0.5" name="godziny" class="form-control" value="@ViewBag.WpisaneGodziny" />
-                            <span class="input-group-text">h</span>
-                        </div>
+                    <label class="form-label-calc text-primary">Godziny Pracy</label>
+                    <div class="input-group">
+                        <input type="number" step="0.5" name="godziny" class="form-control" value="@ViewBag.WpisaneGodziny" />
+                        <span class="input-group-text">h</span>
                     </div>
                 }
                 else
                 {
-                    <div class="col-md-3">
-                        <label class="form-label text-muted">Godziny Pracy</label>
-                        <input type="text" class="form-control" value="Etat (Stała pensja)" disabled />
-                        <input type="hidden" name="godziny" value="168" />
-                    </div>
+                    <label class="form-label-calc text-muted">Czas pracy</label>
+                    <input type="text" class="form-control" value="Etat (Stała pensja)" disabled style="background-color: #f1f3f5;" />
+                    <input type="hidden" name="godziny" value="168" />
                 }
-
-                <div class="col-md-3">
-                    <label class="form-label fw-bold text-danger">Komornik / Potrącenia (Netto)</label>
-                    <div class="input-group">
-                        <input type="number" step="0.01" name="potracenie" class="form-control" value="@ViewBag.WpisanePotracenie" />
-                        <span class="input-group-text">PLN</span>
-                    </div>
-                </div>
-
-                <div class="col-md-3">
-                    <button type="submit" class="btn btn-warning w-100">🔄 Przelicz Wypłatę</button>
-                </div>
-            </form>
-        </div>
-    </div>
-    <div class="card-body">
-        <div class="row">
-            <div class="col-md-6">
-                <h5>Dane podstawowe</h5>
-                <hr />
-                <p><strong>Brutto:</strong> @Model.Brutto.ToString("C")</p>
-                <p><strong>Podstawa ZUS:</strong> @Model.Brutto.ToString("C")</p>
-
-                <p>
-                    Stawka z umowy: @ViewBag.Pracownik.Umowy[0].StawkaBrutto.ToString("C")
-                    (@ViewBag.Pracownik.Umowy[0].SposobWynagradzania)
-                </p>
-                @if (ViewBag.Pracownik.Umowy[0].SposobWynagradzania.ToString() == "StawkaGodzinowa")
-                {
-                    <p class="text-primary">
-                        Wyliczenie: @ViewBag.WpisaneGodziny h * @ViewBag.Pracownik.Umowy[0].StawkaBrutto.ToString("C")
-                    </p>
-                }
-
-                <h5 class="mt-4 text-danger">Składki ZUS (Społeczne)</h5>
-                <hr />
-                <p>Emerytalne (9.76%): <span class="float-end text-danger">-@Model.ZUS_Emerytalne.ToString("C")</span></p>
-                <p>Rentowe (1.50%): <span class="float-end text-danger">-@Model.ZUS_Rentowe.ToString("C")</span></p>
-                <p>Chorobowe (2.45%): <span class="float-end text-danger">-@Model.ZUS_Chorobowe.ToString("C")</span></p>
-                <p class="fw-bold">Razem ZUS: <span class="float-end text-danger">-@Model.ZUS_Razem.ToString("C")</span></p>
             </div>
 
-            <div class="col-md-6">
-                <h5 class="text-warning">Ubezpieczenie Zdrowotne</h5>
-                <hr />
-                <p>Podstawa wymiaru: @((Model.Brutto - Model.ZUS_Razem).ToString("C"))</p>
-                <p class="fw-bold">Składka NFZ (9%): <span class="float-end text-warning">-@Model.SkladkaZdrowotna.ToString("C")</span></p>
-
-                <h5 class="mt-4 text-secondary">Podatek Dochodowy (PIT)</h5>
-                <hr />
-                <p>Koszty uzyskania: @Model.KosztyUzyskania.ToString("C")</p>
-                <p>Podstawa opodatkowania: @Model.PodstawaOpodatkowania.ToString("C")</p>
-                <p class="fw-bold">Zaliczka na PIT: <span class="float-end text-secondary">-@Model.Podatek.ToString("C")</span></p>
-                <p>Podstawa z umowy: @Model.Brutto.ToString("C")</p>
-
-                @if (Model.PotracenieZaNieobecnosci > 0)
-                {
-                    <p class="text-danger">
-                        Potrącenie za nieobecności: -@Model.PotracenieZaNieobecnosci.ToString("C")
-                    </p>
-                }
-
-                @if (Model.WynagrodzenieChorobowe > 0)
-                {
-                    <p class="text-info fw-bold">
-                        + Wynagrodzenie Chorobowe (80%): @Model.WynagrodzenieChorobowe.ToString("C")
-                    </p>
-                }
-
-                @if (Model.PremiaBrutto > 0)
-                {
-                    <p class="text-success">Premia: +@Model.PremiaBrutto.ToString("C")</p>
-                }
-                <hr />
-                <p><strong>Całkowite Brutto: @Model.CalicowiteBrutto.ToString("C")</strong></p>
-
-                <h5 class="mt-4 text-danger">Potrącenia z Netto</h5>
-                <hr />
-                <p>Komornik / Inne: <span class="float-end text-danger">-@Model.PotraceniaKomornicze.ToString("C")</span></p>
-
-            </div>
-        </div>
-
-        <div class="row mt-4">
-            <div class="col-12">
-                <div class="alert alert-success text-center mt-3">
-                    <h1>DO WYPŁATY: @Model.DoWyplaty.ToString("C")</h1>
-                    <small>(Netto: @Model.Netto.ToString("C") - Potrącenia)</small>
+            <div class="col-md-3">
+                <label class="form-label-calc text-danger">Potrącenia komornicze (Netto)</label>
+                <div class="input-group">
+                    <input type="number" step="0.01" name="potracenie" class="form-control" value="@ViewBag.WpisanePotracenie" placeholder="0.00" />
+                    <span class="input-group-text">PLN</span>
                 </div>
             </div>
-        </div>
 
-        <hr class="my-4" />
-
-        <div class="d-flex justify-content-between">
-            <a asp-action="Index" class="btn btn-secondary">Anuluj / Wróć</a>
-
-            <form asp-action="Zatwierdz" method="post">
-                <input type="hidden" name="id" value="@ViewBag.Pracownik.Id" />
-                <input type="hidden" name="rok" value="@ViewBag.Rok" />
-                <input type="hidden" name="miesiac" value="@ViewBag.Miesiac" />
-                <input type="hidden" name="premia" value="@Model.PremiaBrutto" /> 
-                <input type="hidden" name="potracenie" value="@Model.PotraceniaKomornicze" />
-
-                <button type="submit" class="btn btn-primary btn-lg" onclick="return confirm('Czy na pewno chcesz zatwierdzić i zaksięgować tę wypłatę?');">
-                    💾 Zatwierdź Wypłatę
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-recalc">
+                    🔄 Przelicz wartości
                 </button>
-            </form>
+            </div>
+        </div>
+    </form>
+</div>
+
+@if (ViewBag.AiWarning != null)
+{
+    <div class="alert-ai">
+        <div style="font-size: 1.5rem;">🤖</div>
+        <div>
+            <h5 style="margin: 0 0 0.2rem 0; font-weight: 700; color: #c92a2a;">AI Warning System</h5>
+            <p style="margin: 0; color: #495057;">@ViewBag.AiWarning</p>
+        </div>
+    </div>
+}
+
+<div class="payslip-preview">
+    <div class="preview-header">Podgląd rozliczenia (Symulacja)</div>
+
+    <div class="finance-grid">
+
+        <div class="finance-col">
+            <div class="col-header">Naliczenia</div>
+
+            <div class="calc-row">
+                <span>Stawka podstawowa</span>
+                <span class="money text-pos">
+                    @if (ViewBag.Pracownik.Umowy[0].SposobWynagradzania.ToString() == "StawkaGodzinowa")
+                    {
+                        @: @((ViewBag.WpisaneGodziny * ViewBag.Pracownik.Umowy[0].StawkaBrutto).ToString("N2"))
+                    }
+                    else
+                    {
+                        @: @Model.Brutto.ToString("N2")
+                    }
+                    zł
+                </span>
+            </div>
+
+            @if (Model.PremiaBrutto > 0)
+            {
+                <div class="calc-row">
+                    <span>Premia / Dodatki</span>
+                    <span class="money text-pos">+@Model.PremiaBrutto.ToString("N2") zł</span>
+                </div>
+            }
+
+            @if (Model.WynagrodzenieChorobowe > 0)
+            {
+                <div class="calc-row">
+                    <span>Wyn. chorobowe (L4)</span>
+                    <span class="money text-pos">+@Model.WynagrodzenieChorobowe.ToString("N2") zł</span>
+                </div>
+            }
+
+            <div class="calc-row" style="margin-top: 1rem; border-top: 1px solid #dee2e6; padding-top: 0.5rem;">
+                <strong>Suma Brutto</strong>
+                <strong class="money text-pos">@Model.CalicowiteBrutto.ToString("N2") zł</strong>
+            </div>
         </div>
 
-        <a asp-action="Index" class="btn btn-secondary">Wróć do listy</a>
+        <div class="finance-col">
+            <div class="col-header">Potrącenia i Podatki</div>
+
+            @if (Model.PotracenieZaNieobecnosci > 0)
+            {
+                <div class="calc-row">
+                    <span class="text-danger">Potr. za nieobecności</span>
+                    <span class="money text-neg">-@Model.PotracenieZaNieobecnosci.ToString("N2") zł</span>
+                </div>
+            }
+
+            <div class="calc-row">
+                <span>ZUS (Społeczne)</span>
+                <span class="money text-neg">-@Model.ZUS_Razem.ToString("N2") zł</span>
+            </div>
+            <div style="font-size: 0.8rem; color: #868e96; margin-bottom: 0.5rem; padding-left: 0.5rem;">
+                E: @Model.ZUS_Emerytalne.ToString("N2") | R: @Model.ZUS_Rentowe.ToString("N2") | Ch: @Model.ZUS_Chorobowe.ToString("N2")
+            </div>
+
+            <div class="calc-row">
+                <span>Składka Zdrowotna (NFZ)</span>
+                <span class="money text-neg">-@Model.SkladkaZdrowotna.ToString("N2") zł</span>
+            </div>
+
+            <div class="calc-row">
+                <span>Zaliczka PIT</span>
+                <span class="money text-neg">-@Model.Podatek.ToString("N2") zł</span>
+            </div>
+
+            @if (Model.PotraceniaKomornicze > 0)
+            {
+                <div class="calc-row">
+                    <span class="text-danger">Komornik / Inne</span>
+                    <span class="money text-neg">-@Model.PotraceniaKomornicze.ToString("N2") zł</span>
+                </div>
+            }
+        </div>
     </div>
+
+    <div class="net-section">
+        <div style="text-transform: uppercase; color: #2b8a3e; font-weight: 600; font-size: 0.9rem; margin-bottom: 0.5rem;">Do Wypłaty (Netto)</div>
+        <div class="net-amount">@Model.DoWyplaty.ToString("N2") zł</div>
+    </div>
+</div>
+
+<div class="d-flex justify-content-end mt-4">
+    <form asp-action="Zatwierdz" method="post">
+        <input type="hidden" name="id" value="@ViewBag.Pracownik.Id" />
+        <input type="hidden" name="rok" value="@ViewBag.Rok" />
+        <input type="hidden" name="miesiac" value="@ViewBag.Miesiac" />
+        <input type="hidden" name="premia" value="@Model.PremiaBrutto" />
+        <input type="hidden" name="potracenie" value="@Model.PotraceniaKomornicze" />
+        @if (ViewBag.Pracownik.Umowy[0].SposobWynagradzania.ToString() == "StawkaGodzinowa")
+        {
+            <input type="hidden" name="godziny" value="@ViewBag.WpisaneGodziny" />
+        }
+
+        <button type="submit" class="btn-confirm" onclick="return confirm('Czy na pewno chcesz zatwierdzić tę wypłatę? Operacja jest nieodwracalna.');">
+            💾 Zatwierdź i Zaksięguj
+        </button>
+    </form>
 </div>

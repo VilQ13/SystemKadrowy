@@ -1,124 +1,311 @@
 ﻿@model SystemKadrowy.Core.Domain.Pracownik
 
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Edycja pracownika";
 }
 
-<h1>Edit</h1>
+<style>
+    .page-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
 
-<h4>Pracownik</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit" enctype="multipart/form-data">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="Id" />
-            <input type="hidden" asp-for="ZdjecieSciezka" />
-            <input type="hidden" asp-for="AdresZamieszkania.Id" />
-            <div class="col-md-6 mb-3">
-                <label class="control-label fw-bold">Zdjęcie profilowe</label>
+        .page-header h1 {
+            margin: 0 0 0.5rem 0;
+            font-size: 2rem;
+            font-weight: 600;
+        }
 
-                @if (!string.IsNullOrEmpty(Model.ZdjecieSciezka))
-                {
-                    <div class="mb-2">
-                        <img src="~/zdjecia/@Model.ZdjecieSciezka" style="max-width: 150px; border-radius: 5px;" />
-                    </div>
-                }
+        .page-header p {
+            margin: 0;
+            opacity: 0.9;
+            font-size: 0.95rem;
+        }
 
-                <input type="file" name="plikZdjecia" class="form-control" accept=".jpg,.jpeg,.png" />
-                <small class="text-muted">Pozostaw puste, aby zachować obecne zdjęcie.</small>
-            </div>
-            <div class="form-group">
-                <label asp-for="Imie" class="control-label"></label>
-                <input asp-for="Imie" class="form-control" />
-                <span asp-validation-for="Imie" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Nazwisko" class="control-label"></label>
-                <input asp-for="Nazwisko" class="form-control" />
-                <span asp-validation-for="Nazwisko" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="PESEL" class="control-label"></label>
-                <input asp-for="PESEL" class="form-control" />
-                <span asp-validation-for="PESEL" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="DataUrodzenia" class="control-label"></label>
-                <input asp-for="DataUrodzenia" type="date" class="form-control" asp-format="{0:yyyy-MM-dd}" />
-                <span asp-validation-for="DataUrodzenia" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Email" class="control-label"></label>
-                <input asp-for="Email" class="form-control" />
-                <span asp-validation-for="Email" class="text-danger"></span>
-            </div>
-            <div class="row">
-                <div class="col-md-6">
-                    <h4>Dane podstawowe</h4>
-                    <div class="form-group mb-3">
-                        <label asp-for="Telefon" class="control-label"></label>
-                        <input asp-for="Telefon" class="form-control" />
-                    </div>
-                    <div class="form-group mb-3">
-                        <label asp-for="NumerKontaBankowego" class="control-label">Nr Konta Bankowego</label>
-                        <input asp-for="NumerKontaBankowego" class="form-control" />
-                    </div>
-                </div>
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 500;
+        margin-bottom: 1.5rem;
+        transition: all 0.2s ease;
+    }
 
-                <div class="col-md-6">
-                    <h4 class="text-primary">Adres Zamieszkania</h4>
-                    <div class="card p-3 bg-light">
+        .back-link:hover {
+            color: #5568d3;
+            gap: 0.7rem;
+        }
 
-                        <div class="row">
-                            <div class="col-4">
-                                <div class="form-group mb-3">
-                                    <label class="control-label">Kod</label>
-                                    <input asp-for="AdresZamieszkania.KodPocztowy.Kod" class="form-control" placeholder="00-000" />
-                                </div>
-                            </div>
-                            <div class="col-8">
-                                <div class="form-group mb-3">
-                                    <label class="control-label">Miejscowość</label>
-                                    <input asp-for="AdresZamieszkania.KodPocztowy.Miejscowosc" class="form-control" />
-                                </div>
-                            </div>
-                        </div>
+    .form-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        padding: 2rem;
+        max-width: 1000px;
+    }
 
-                        <div class="form-group mb-3">
-                            <label asp-for="AdresZamieszkania.Ulica" class="control-label">Ulica</label>
-                            <input asp-for="AdresZamieszkania.Ulica" class="form-control" />
-                        </div>
+    .section-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #212529;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid #f1f3f5;
+    }
 
-                        <div class="row">
-                            <div class="col-6">
-                                <div class="form-group mb-3">
-                                    <label asp-for="AdresZamieszkania.NumerDomu" class="control-label">Nr Domu</label>
-                                    <input asp-for="AdresZamieszkania.NumerDomu" class="form-control" />
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="form-group mb-3">
-                                    <label asp-for="AdresZamieszkania.NumerLokalu" class="control-label">Nr Lokalu</label>
-                                    <input asp-for="AdresZamieszkania.NumerLokalu" class="form-control" />
-                                </div>
-                            </div>
-                        </div>
+    .photo-upload-section {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        border: 2px dashed #dee2e6;
+        transition: all 0.3s ease;
+    }
 
-                    </div>
-                </div>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
-            </div>
-        </form>
-    </div>
+        .photo-upload-section:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+    .current-photo {
+        margin-bottom: 1rem;
+    }
+
+        .current-photo img {
+            max-width: 150px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border: 3px solid white;
+        }
+
+    .form-label-custom {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+    }
+
+    .form-control-custom {
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 0.75rem;
+        transition: all 0.2s ease;
+        font-size: 0.95rem;
+    }
+
+        .form-control-custom:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            outline: none;
+        }
+
+    .form-group-custom {
+        margin-bottom: 1.5rem;
+    }
+
+    .address-card {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-radius: 10px;
+        padding: 1.5rem;
+        border: 1px solid #dee2e6;
+    }
+
+        .address-card .section-title {
+            color: #667eea;
+            border-bottom-color: #667eea;
+            font-size: 1.1rem;
+        }
+
+    .btn-save {
+        background: linear-gradient(135deg, #51cf66 0%, #40c057 100%);
+        color: white;
+        padding: 0.875rem 2.5rem;
+        border-radius: 8px;
+        border: none;
+        font-weight: 600;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 4px rgba(81, 207, 102, 0.3);
+        cursor: pointer;
+    }
+
+        .btn-save:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(81, 207, 102, 0.4);
+        }
+
+    .text-danger {
+        font-size: 0.85rem;
+        margin-top: 0.25rem;
+    }
+
+    .text-muted-custom {
+        font-size: 0.85rem;
+        color: #868e96;
+        margin-top: 0.25rem;
+    }
+
+    .row-spacing {
+        margin-top: 2rem;
+    }
+
+    .input-group-row {
+        display: flex;
+        gap: 1rem;
+    }
+
+        .input-group-row > div {
+            flex: 1;
+        }
+</style>
+
+<a asp-action="Index" class="back-link">
+    ← Powrót do listy
+</a>
+
+<div class="page-header">
+    <h1>Edycja pracownika</h1>
+    <p>Zaktualizuj dane pracownika w systemie</p>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
+<div class="form-card">
+    <form asp-action="Edit" enctype="multipart/form-data">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <input type="hidden" asp-for="Id" />
+        <input type="hidden" asp-for="ZdjecieSciezka" />
+        <input type="hidden" asp-for="AdresZamieszkania.Id" />
+
+        <!-- Sekcja zdjęcia -->
+        <div class="photo-upload-section">
+            <label class="form-label-custom">📸 Zdjęcie profilowe</label>
+
+            @if (!string.IsNullOrEmpty(Model.ZdjecieSciezka))
+            {
+                <div class="current-photo">
+                    <img src="~/zdjecia/@Model.ZdjecieSciezka" alt="Zdjęcie pracownika" />
+                </div>
+            }
+
+            <input type="file" name="plikZdjecia" class="form-control form-control-custom" accept=".jpg,.jpeg,.png" />
+            <small class="text-muted-custom">Pozostaw puste, aby zachować obecne zdjęcie. Akceptowane formaty: JPG, JPEG, PNG</small>
+        </div>
+
+        <!-- Dane osobowe -->
+        <div class="section-title">Dane osobowe</div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group-custom">
+                    <label asp-for="Imie" class="form-label-custom"></label>
+                    <input asp-for="Imie" class="form-control form-control-custom" />
+                    <span asp-validation-for="Imie" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group-custom">
+                    <label asp-for="Nazwisko" class="form-label-custom"></label>
+                    <input asp-for="Nazwisko" class="form-control form-control-custom" />
+                    <span asp-validation-for="Nazwisko" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group-custom">
+                    <label asp-for="PESEL" class="form-label-custom"></label>
+                    <input asp-for="PESEL" class="form-control form-control-custom" />
+                    <span asp-validation-for="PESEL" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group-custom">
+                    <label asp-for="DataUrodzenia" class="form-label-custom"></label>
+                    <input asp-for="DataUrodzenia" type="date" class="form-control form-control-custom" asp-format="{0:yyyy-MM-dd}" />
+                    <span asp-validation-for="DataUrodzenia" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dane kontaktowe -->
+        <div class="section-title row-spacing">Dane kontaktowe</div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group-custom">
+                    <label asp-for="Email" class="form-label-custom"></label>
+                    <input asp-for="Email" class="form-control form-control-custom" type="email" />
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group-custom">
+                    <label asp-for="Telefon" class="form-label-custom"></label>
+                    <input asp-for="Telefon" class="form-control form-control-custom" />
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group-custom">
+            <label asp-for="NumerKontaBankowego" class="form-label-custom">Numer konta bankowego</label>
+            <input asp-for="NumerKontaBankowego" class="form-control form-control-custom" placeholder="00 0000 0000 0000 0000 0000 0000" />
+        </div>
+
+        <!-- Adres zamieszkania -->
+        <div class="section-title row-spacing">Adres zamieszkania</div>
+
+        <div class="address-card">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group-custom">
+                        <label class="form-label-custom">Kod pocztowy</label>
+                        <input asp-for="AdresZamieszkania.KodPocztowy.Kod" class="form-control form-control-custom" placeholder="00-000" />
+                    </div>
+                </div>
+                <div class="col-md-8">
+                    <div class="form-group-custom">
+                        <label class="form-label-custom">Miejscowość</label>
+                        <input asp-for="AdresZamieszkania.KodPocztowy.Miejscowosc" class="form-control form-control-custom" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group-custom">
+                <label asp-for="AdresZamieszkania.Ulica" class="form-label-custom">Ulica</label>
+                <input asp-for="AdresZamieszkania.Ulica" class="form-control form-control-custom" />
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group-custom">
+                        <label asp-for="AdresZamieszkania.NumerDomu" class="form-label-custom">Numer domu</label>
+                        <input asp-for="AdresZamieszkania.NumerDomu" class="form-control form-control-custom" />
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group-custom">
+                        <label asp-for="AdresZamieszkania.NumerLokalu" class="form-label-custom">Numer lokalu</label>
+                        <input asp-for="AdresZamieszkania.NumerLokalu" class="form-control form-control-custom" placeholder="Opcjonalnie" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Przycisk zapisu -->
+        <div class="form-group-custom" style="margin-top: 2.5rem;">
+            <button type="submit" class="btn-save">💾 Zapisz zmiany</button>
+        </div>
+    </form>
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

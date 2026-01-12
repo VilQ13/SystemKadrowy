@@ -5,6 +5,8 @@ using System.Globalization;
 using SystemKadrowy.Core.Interfaces;
 using SystemKadrowy.Core.Services;
 using SystemKadrowy.Infrastructure.Persistence;
+using SystemKadrowy.Web.Filters;
+using QuestPDF.Infrastructure;
 
 namespace SystemKadrowy.Web
 {
@@ -17,26 +19,32 @@ namespace SystemKadrowy.Web
             builder.Services.AddDbContext<KadryDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
             builder.Services.AddDefaultIdentity<IdentityUser>(options => {
-                // Opcjonalnie: Konfiguracja hase³ (np. czy musz¹ byæ trudne)
                 options.SignIn.RequireConfirmedAccount = false;
                 options.Password.RequireDigit = false;
                 options.Password.RequireNonAlphanumeric = false;
                 options.Password.RequiredLength = 5;
             })
-            .AddRoles<IdentityRole>() // <--- WA¯NE: W³¹czamy obs³ugê Ról!
+            .AddRoles<IdentityRole>()
             .AddEntityFrameworkStores<KadryDbContext>();
 
-            // Rejestracja serwisu obliczeniowego
+            // Rejestracja serwisów
             builder.Services.AddScoped<IKalkulatorPlac, KalkulatorPlacService>();
+            builder.Services.AddScoped<SystemKadrowy.Web.Services.AnomalyDetectorService>();
+            builder.Services.AddTransient<SystemKadrowy.Web.Services.DaneTestoweSeeder>();
 
             // Add services to the container.
-            builder.Services.AddControllersWithViews();
+            builder.Services.AddControllersWithViews(options =>
+            {
+                options.Filters.Add<ZmianaHaslaFilter>();
+            });
+
+            QuestPDF.Settings.License = LicenseType.Community;
 
             var app = builder.Build();
 
             var defaultDateCulture = "pl-PL";
             var ci = new CultureInfo(defaultDateCulture);
-            // Opcjonalnie: Upewniamy siê, ¿e liczby maj¹ przecinek, a waluta to z³
+            // Upewniamy siê, ¿e liczby maj¹ przecinek, a waluta to z³
             ci.NumberFormat.NumberDecimalSeparator = ",";
             ci.NumberFormat.CurrencyDecimalSeparator = ",";
 
@@ -54,6 +62,7 @@ namespace SystemKadrowy.Web
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
+
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
@@ -73,7 +82,26 @@ namespace SystemKadrowy.Web
             using (var scope = app.Services.CreateScope())
             {
                 var services = scope.ServiceProvider;
-                SystemKadrowy.Web.Services.UserSeeder.SeedRolesAndAdminAsync(services).Wait(); ;
+
+                try
+                {
+                    // Migracja Bazy (Tworzenie struktury)
+                    var context = services.GetRequiredService<KadryDbContext>();
+                    context.Database.Migrate();
+
+                    // Seeder U¿ytkowników i Ról
+                    SystemKadrowy.Web.Services.UserSeeder.SeedRolesAndAdminAsync(services).Wait();
+
+                    // Seeder Danych Testowych
+                    var dataSeeder = services.GetRequiredService<SystemKadrowy.Web.Services.DaneTestoweSeeder>();
+                    dataSeeder.ZainicjujDane().Wait();
+                }
+                catch (Exception ex)
+                {
+                    // Logujemy b³¹d, jeœli coœ pójdzie nie tak
+                    var logger = services.GetRequiredService<ILogger<Program>>();
+                    logger.LogError(ex, "Wyst¹pi³ b³¹d podczas migracji lub inicjalizacji bazy danych.");
+                }
             }
 
             app.Run();

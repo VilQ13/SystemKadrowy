@@ -21,7 +21,7 @@ namespace SystemKadrowy.Core.Domain
 
         public TypNieobecnosc Typ { get; set; }
 
-        // Pomocnicze: ile to dni roboczych? (Na razie wpiszemy ręcznie, w przyszłości automat)
+        // Pomocnicze: ile to dni roboczych?
         public int LiczbaDniRoboczych { get; set; }
         public decimal LiczbaGodzin { get; set; }
     }

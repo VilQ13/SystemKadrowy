@@ -19,7 +19,6 @@ namespace SystemKadrowy.Core.Services
             decimal wyliczoneChorobowe = 0;
             decimal wyliczonePotracenieZaDni = 0;
 
-            // NOWE ZMIENNE DO ZLICZANIA:
             int sumaDni = 0;
             decimal sumaGodzin = 0;
 
@@ -47,7 +46,7 @@ namespace SystemKadrowy.Core.Services
                         {
                             int dni = n.LiczbaDniRoboczych;
 
-                            // Zliczamy dni (Sumujemy wszystko co pomniejsza pensję)
+                            // Zliczamy dni
                             if (n.Typ == TypNieobecnosc.Chorobowe ||
                                 n.Typ == TypNieobecnosc.UrlopBezplatny ||
                                 n.Typ == TypNieobecnosc.NieobecnoscNieusprawiedliwiona)
@@ -74,9 +73,7 @@ namespace SystemKadrowy.Core.Services
             }
 
             decimal podstawaPoPotraceniach = Math.Max(0, bazaBrutto - wyliczonePotracenieZaDni);
-
-            // Przekazujemy sumy do metody szczegółowej (ObliczUoP) lub ustawiamy je po powrocie
-            // Najprościej: Wywołajmy metodę, a potem uzupełnijmy wynik brakującymi polami
+            
 
             WynikWyplaty wynik;
 
@@ -87,7 +84,6 @@ namespace SystemKadrowy.Core.Services
                     break;
 
                 case TypUmowy.UmowaZlecenie:
-                    // Zlecenie rzadko ma płatne L4 w ten sposób, ale przekażmy analogicznie
                     wynik = ObliczZlecenie(umowa, podstawaPoPotraceniach, premia, potracenie);
                     break;
 
@@ -100,7 +96,6 @@ namespace SystemKadrowy.Core.Services
                 //case TypUmowy.B2B_Liniowy:
                 //    break;
 
-                // ... reszta case'ów ...
                 default:
                     wynik = new WynikWyplaty { Brutto = bazaBrutto };
                     break;
@@ -142,8 +137,7 @@ namespace SystemKadrowy.Core.Services
             // Podatek
             w.KosztyUzyskania = umowa.CzyKosztyPodwyzszone ? 300m : 250m;
 
-            // Jeśli pracownik był cały miesiąc chory, koszty mogą być proporcjonalnie mniejsze, 
-            // ale zostawmy standardowe dla uproszczenia.
+            // Jeśli pracownik był cały miesiąc chory, koszty mogą być proporcjonalnie mniejsze
             decimal podstawaPit = w.CalicowiteBrutto - w.ZUS_Razem - w.KosztyUzyskania;
             w.PodstawaOpodatkowania = Math.Max(0, Math.Round(podstawaPit, 0));
 
@@ -223,7 +217,7 @@ namespace SystemKadrowy.Core.Services
             return w;
         }
 
-        // --- 3. B2B RYCZAŁT (Nowość!) ---
+        // --- 3. B2B RYCZAŁT ---
         private WynikWyplaty ObliczB2B_Ryczalt(Umowa umowa, decimal wyliczonaPodstawa, decimal premia, decimal potracenie)
         {
             var w = new WynikWyplaty();
@@ -235,7 +229,6 @@ namespace SystemKadrowy.Core.Services
             w.CalicowiteBrutto = w.Brutto + w.PremiaBrutto;
 
             // Stałe ZUS na rok 2025 (Prognoza "Duży ZUS")
-            // W prawdziwym systemie te liczby pobierałbyś z bazy danych parametrów!
             decimal zusSpoleczne = 1641.10m; // Emerytalne+Rentowe+Wypadkowe+FP
 
             if (umowa.CzyDobrowolneChorobowe)
@@ -243,11 +236,10 @@ namespace SystemKadrowy.Core.Services
                 w.ZUS_Chorobowe = 122.18m; // Prognoza 2025
             }
 
-            // Przypisujemy do pól wynikowych (B2B płaci ryczałtowo, nie procentowo od brutto)
+            // B2B płaci ryczałtowo, nie procentowo od brutto
             w.ZUS_Razem = zusSpoleczne + w.ZUS_Chorobowe;
 
             // Zdrowotna na Ryczałcie zależy od przychodu rocznego.
-            // Uproszczenie: Zakładamy, że miesięczny * 12 daje nam próg.
             decimal przychodRoczny = w.Brutto * 12;
 
             if (przychodRoczny < 60000)
@@ -264,14 +256,13 @@ namespace SystemKadrowy.Core.Services
             decimal podstawaOpodatkowania = w.Brutto - w.ZUS_Razem - odliczenieZdr;
             w.PodstawaOpodatkowania = Math.Round(podstawaOpodatkowania, 0);
 
-            // Ryczałt (zakładamy 12% dla branży IT, ale to powinno być konfigurowalne)
-            // Tutaj hardkodujemy 12%
+            // Ryczałt
             w.Podatek = Math.Round(w.PodstawaOpodatkowania * 0.12m, 0);
 
             // Na rękę (Dochód netto)
             w.Netto = w.CalicowiteBrutto - w.ZUS_Razem - w.SkladkaZdrowotna - w.Podatek;
 
-            // FINAŁ: Odejmowanie komornika
+            // Odejmowanie komornika
             w.DoWyplaty = w.Netto - w.PotraceniaKomornicze;
 
             return w;

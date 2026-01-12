@@ -1,7 +1,8 @@
-﻿@model SystemKadrowy.Core.Domain.Umowa
+﻿@using Microsoft.AspNetCore.Identity
+@model IdentityUser
 
 @{
-    ViewData["Title"] = "Usuń umowę";
+    ViewData["Title"] = "Usuń Użytkownika";
 }
 
 <style>
@@ -47,7 +48,7 @@
         border-radius: 12px;
         box-shadow: 0 2px 8px rgba(0,0,0,0.08);
         overflow: hidden;
-        max-width: 800px;
+        max-width: 700px;
         margin: 0 auto;
     }
 
@@ -106,7 +107,7 @@
     }
 
     .info-label {
-        flex: 0 0 160px;
+        flex: 0 0 150px;
         font-weight: 600;
         color: #495057;
         font-size: 0.9rem;
@@ -117,6 +118,15 @@
         color: #212529;
         font-size: 1rem;
         font-weight: 500;
+    }
+
+    .tech-font {
+        font-family: 'Consolas', monospace;
+        background: #e9ecef;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 0.9em;
+        color: #495057;
     }
 
     .action-section {
@@ -185,55 +195,34 @@
 }
 
 <div class="page-header">
-    <h1>⚠️ Usuwanie umowy</h1>
-    <p>Potwierdź usunięcie dokumentu z systemu</p>
+    <h1>⚠️ Usuwanie Konta</h1>
+    <p>Operacja usunięcia użytkownika z systemu</p>
 </div>
 
 <div class="warning-card">
     <div class="warning-banner">
         <div class="warning-icon">⚠️</div>
         <div class="warning-text">
-            <h3>Czy na pewno chcesz usunąć tę umowę?</h3>
-            <p>Usunięcie umowy może wpłynąć na historię zatrudnienia i wypłaty.</p>
+            <h3>Czy na pewno chcesz usunąć to konto?</h3>
+            <p>Użytkownik straci dostęp do systemu. Operacja jest nieodwracalna.</p>
         </div>
     </div>
 
     <div class="details-section">
-        <div class="section-title">Szczegóły usuwanej umowy</div>
+        <div class="section-title">Dane usuwanego użytkownika</div>
 
         <div class="info-grid">
             <div class="info-row">
-                <div class="info-label">@Html.DisplayNameFor(model => model.Pracownik)</div>
-                <div class="info-value">@Html.DisplayFor(model => model.Pracownik.Email)</div>
-            </div>
-
-            <div class="info-row">
-                <div class="info-label">Stanowisko</div>
+                <div class="info-label">Email (Login)</div>
                 <div class="info-value">
-                    @Html.DisplayFor(model => model.Stanowisko)
-                    <span style="color: #868e96; font-size: 0.9em;">(@Html.DisplayFor(model => model.TypUmowy))</span>
+                    <strong>@Model.Email</strong>
                 </div>
             </div>
 
             <div class="info-row">
-                <div class="info-label">Stawka brutto</div>
-                <div class="info-value" style="color: #c92a2a; font-weight: 700;">
-                    @Html.DisplayFor(model => model.StawkaBrutto)
-                </div>
-            </div>
-
-            <div class="info-row">
-                <div class="info-label">Okres trwania</div>
+                <div class="info-label">Identyfikator</div>
                 <div class="info-value">
-                    Od <strong>@Html.DisplayFor(model => model.DataRozpoczecia)</strong>
-                    @if (Model.DataZakonczenia.HasValue)
-                    {
-                        <span> do <strong>@Html.DisplayFor(model => model.DataZakonczenia)</strong></span>
-                    }
-                    else
-                    {
-                        <span> (Czas nieokreślony)</span>
-                    }
+                    <span class="tech-font">@Model.Id</span>
                 </div>
             </div>
         </div>
@@ -258,7 +247,7 @@
                 }
 
                 <button type="submit" class="btn-delete">
-                    🗑️ Usuń umowę
+                    🗑️ Tak, usuń trwale
                 </button>
             </div>
         </div>

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SystemKadrowy.Core.Domain
 {
@@ -6,7 +7,6 @@ namespace SystemKadrowy.Core.Domain
     {
         public int Id { get; set; }
 
-        // Relacja: Kogo dotyczy wypłata
         public int PracownikId { get; set; }
         public Pracownik? Pracownik { get; set; }
 
@@ -15,8 +15,7 @@ namespace SystemKadrowy.Core.Domain
         public int Miesiac { get; set; }
         public DateTime DataGenerowania { get; set; } = DateTime.Now;
 
-        // --- WARTOŚCI FINANSOWE (Kopia paska wypłaty) ---
-        // Zapisujemy same liczby, żeby historia była "martwa" (niezmienna)
+        // --- WARTOŚCI FINANSOWE ---
         public decimal Brutto { get; set; }
         public decimal Netto { get; set; }
 
@@ -28,7 +27,9 @@ namespace SystemKadrowy.Core.Domain
         public decimal Podatek { get; set; } // Zaliczka PIT
         public decimal KosztyUzyskania { get; set; }
         public decimal PremiaBrutto { get; set; }
-        public decimal WynagrodzenieChorobowe { get; set; } // To jest te 80%
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal CalicowiteBrutto { get; set; }
+        public decimal WynagrodzenieChorobowe { get; set; } // 80%
         public decimal PotracenieZaNieobecnosci { get; set; } // To jest to co odejmujemy z podstawy
         public int IleDniNieobecnosci { get; set; }       // Np. 3 dni
         public decimal IleGodzinNieobecnosci { get; set; } // Np. 2.5 godziny

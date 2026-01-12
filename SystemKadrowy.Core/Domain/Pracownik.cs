@@ -9,7 +9,7 @@ namespace SystemKadrowy.Core.Domain
 {
     public class Pracownik
     {
-        public int Id { get; set; } // Unikalne ID z bazy danych
+        public int Id { get; set; }
         public string Imie { get; set; } = string.Empty;
         public string Nazwisko { get; set; } = string.Empty;
         public string PESEL { get; set; } = string.Empty;
@@ -24,7 +24,7 @@ namespace SystemKadrowy.Core.Domain
         public string? ZdjecieSciezka { get; set; }
 
         // RELACJA DO ADRESU
-        public int? AdresId { get; set; } // Może być null na początku
+        public int? AdresId { get; set; }
         public Adres? AdresZamieszkania { get; set; }
 
         // Relacja: Jeden pracownik ma wiele umów (historia zatrudnienia)

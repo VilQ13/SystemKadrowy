@@ -1,15 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using SystemKadrowy.Core.Domain;
 using SystemKadrowy.Infrastructure.Persistence;
 
 namespace SystemKadrowy.Web.Controllers
 {
+
+    [Authorize(Roles = "Admin,Kadry")]
     public class UmowyController : Controller
     {
         private readonly KadryDbContext _context;

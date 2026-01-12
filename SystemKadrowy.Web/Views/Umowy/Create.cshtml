@@ -2,85 +2,263 @@
 @using SystemKadrowy.Core.Enums
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Nowa umowa";
 }
 
-<h1>Create</h1>
+<style>
+    .page-header {
+        background: linear-gradient(135deg, #51cf66 0%, #40c057 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 6px rgba(81, 207, 102, 0.3);
+    }
 
-<h4>Umowa</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="PracownikId" class="control-label"></label>
-                <select asp-for="PracownikId" class ="form-control" asp-items="ViewBag.PracownikId"></select>
-            </div>
-            <div class="form-group">
-                <label asp-for="TypUmowy" class="control-label"></label>
-                <select asp-for="TypUmowy" class="form-control"
-                        asp-items="Html.GetEnumSelectList<SystemKadrowy.Core.Enums.TypUmowy>()">
-                </select>
-                <span asp-validation-for="TypUmowy" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Stanowisko" class="control-label"></label>
-                <input asp-for="Stanowisko" class="form-control" />
-                <span asp-validation-for="Stanowisko" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label class="control-label">Sposób rozliczania</label>
-                <select asp-for="SposobWynagradzania" class="form-control"
-                        asp-items="Html.GetEnumSelectList<SystemKadrowy.Core.Enums.SposobWynagradzania>()"></select>
-                <span asp-validation-for="SposobWynagradzania" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="StawkaBrutto" class="control-label">Stawka (Miesięczna lub Godzinowa)</label>
-                <input asp-for="StawkaBrutto" class="form-control" />
-                <span asp-validation-for="StawkaBrutto" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="DataRozpoczecia" class="control-label"></label>
-                <input asp-for="DataRozpoczecia" type="date" class="form-control" />
-                <span asp-validation-for="DataRozpoczecia" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="DataZakonczenia" class="control-label"></label>
-                <input asp-for="DataZakonczenia" type="date" class="form-control" />
-                <span asp-validation-for="DataZakonczenia" class="text-danger"></span>
-            </div>
-            <div class="form-group form-check">
-                <label class="form-check-label">
-                    <input class="form-check-input" asp-for="CzyKosztyPodwyzszone" /> @Html.DisplayNameFor(model => model.CzyKosztyPodwyzszone)
-                </label>
-            </div>
-            <div class="form-group form-check">
-                <label class="form-check-label">
-                    <input class="form-check-input" asp-for="CzyUlgaPodatkowa" /> @Html.DisplayNameFor(model => model.CzyUlgaPodatkowa)
-                </label>
-            </div>
-            <div class="form-group form-check">
-                <label class="form-check-label">
-                    <input class="form-check-input" asp-for="CzyStudent" /> @Html.DisplayNameFor(model => model.CzyStudent)
-                </label>
-            </div>
-            <div class="form-group form-check">
-                <label class="form-check-label">
-                    <input class="form-check-input" asp-for="CzyDobrowolneChorobowe" /> @Html.DisplayNameFor(model => model.CzyDobrowolneChorobowe)
-                </label>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
-            </div>
-        </form>
-    </div>
+        .page-header h1 {
+            margin: 0 0 0.5rem 0;
+            font-size: 2rem;
+            font-weight: 600;
+        }
+
+        .page-header p {
+            margin: 0;
+            opacity: 0.9;
+            font-size: 0.95rem;
+        }
+
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 500;
+        margin-bottom: 1.5rem;
+        transition: all 0.2s ease;
+    }
+
+        .back-link:hover {
+            color: #5568d3;
+            gap: 0.7rem;
+        }
+
+    .form-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        padding: 2rem;
+        max-width: 1000px;
+    }
+
+    .section-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #212529;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid #f1f3f5;
+        margin-top: 1rem;
+    }
+
+    .form-label-custom {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+    }
+
+    .form-control-custom {
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        padding: 0.75rem;
+        transition: all 0.2s ease;
+        font-size: 0.95rem;
+    }
+
+        .form-control-custom:focus {
+            border-color: #51cf66;
+            box-shadow: 0 0 0 3px rgba(81, 207, 102, 0.1);
+            outline: none;
+        }
+
+    .form-group-custom {
+        margin-bottom: 1.5rem;
+    }
+
+    .settings-card {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9f5ec 100%);
+        border-radius: 10px;
+        padding: 1.5rem;
+        border: 1px solid #dee2e6;
+        border-left: 4px solid #51cf66;
+    }
+
+    .form-check-custom {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.5rem 0;
+    }
+
+    .form-check-input {
+        width: 1.2em;
+        height: 1.2em;
+        cursor: pointer;
+    }
+
+    .form-check-label {
+        cursor: pointer;
+        font-weight: 500;
+        color: #495057;
+    }
+
+    .btn-create {
+        background: linear-gradient(135deg, #51cf66 0%, #40c057 100%);
+        color: white;
+        padding: 0.875rem 2.5rem;
+        border-radius: 8px;
+        border: none;
+        font-weight: 600;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 4px rgba(81, 207, 102, 0.3);
+        cursor: pointer;
+    }
+
+        .btn-create:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(81, 207, 102, 0.4);
+        }
+
+    .text-danger {
+        font-size: 0.85rem;
+        margin-top: 0.25rem;
+    }
+</style>
+
+<a asp-action="Index" class="back-link">
+    ← Powrót do listy
+</a>
+
+<div class="page-header">
+    <h1>📄 Nowa umowa</h1>
+    <p>Dodaj nową umowę i przypisz ją do pracownika</p>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
+<div class="form-card">
+    <form asp-action="Create">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+        <div class="section-title" style="margin-top: 0;">Dane podstawowe</div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group-custom">
+                    <label asp-for="PracownikId" class="form-label-custom">👤 Pracownik</label>
+                    <select asp-for="PracownikId" class="form-control form-control-custom" asp-items="ViewBag.PracownikId"></select>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group-custom">
+                    <label asp-for="Stanowisko" class="form-label-custom">💼 Stanowisko</label>
+                    <input asp-for="Stanowisko" class="form-control form-control-custom" placeholder="np. Młodszy Specjalista" />
+                    <span asp-validation-for="Stanowisko" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group-custom">
+            <label asp-for="TypUmowy" class="form-label-custom">📄 Rodzaj umowy</label>
+            <select asp-for="TypUmowy" class="form-control form-control-custom"
+                    asp-items="Html.GetEnumSelectList<SystemKadrowy.Core.Enums.TypUmowy>()">
+            </select>
+            <span asp-validation-for="TypUmowy" class="text-danger"></span>
+        </div>
+
+        <div class="section-title">Warunki finansowe i czasowe</div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group-custom">
+                    <label asp-for="SposobWynagradzania" class="form-label-custom">📊 Sposób rozliczania</label>
+                    <select asp-for="SposobWynagradzania" class="form-control form-control-custom"
+                            asp-items="Html.GetEnumSelectList<SystemKadrowy.Core.Enums.SposobWynagradzania>()"></select>
+                    <span asp-validation-for="SposobWynagradzania" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group-custom">
+                    <label asp-for="StawkaBrutto" class="form-label-custom">💰 Stawka (PLN)</label>
+                    <input asp-for="StawkaBrutto" class="form-control form-control-custom" placeholder="0.00" />
+                    <span asp-validation-for="StawkaBrutto" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group-custom">
+                    <label asp-for="DataRozpoczecia" class="form-label-custom">📅 Data rozpoczęcia</label>
+                    <input asp-for="DataRozpoczecia" type="date" class="form-control form-control-custom" value="@DateTime.Now.ToString("yyyy-MM-dd")" />
+                    <span asp-validation-for="DataRozpoczecia" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group-custom">
+                    <label asp-for="DataZakonczenia" class="form-label-custom">🏁 Data zakończenia</label>
+                    <input asp-for="DataZakonczenia" type="date" class="form-control form-control-custom" />
+                    <span asp-validation-for="DataZakonczenia" class="text-danger"></span>
+                    <small class="text-muted" style="font-size: 0.8rem; display: block; margin-top: 0.25rem;">Pozostaw puste dla umowy na czas nieokreślony</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-title">Ustawienia dodatkowe</div>
+
+        <div class="settings-card">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group-custom form-check-custom">
+                        <input class="form-check-input" asp-for="CzyKosztyPodwyzszone" />
+                        <label class="form-check-label" asp-for="CzyKosztyPodwyzszone">
+                            📈 @Html.DisplayNameFor(model => model.CzyKosztyPodwyzszone)
+                        </label>
+                    </div>
+
+                    <div class="form-group-custom form-check-custom">
+                        <input class="form-check-input" asp-for="CzyUlgaPodatkowa" />
+                        <label class="form-check-label" asp-for="CzyUlgaPodatkowa">
+                            📉 @Html.DisplayNameFor(model => model.CzyUlgaPodatkowa)
+                        </label>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group-custom form-check-custom">
+                        <input class="form-check-input" asp-for="CzyStudent" />
+                        <label class="form-check-label" asp-for="CzyStudent">
+                            🎓 @Html.DisplayNameFor(model => model.CzyStudent)
+                        </label>
+                    </div>
+
+                    <div class="form-group-custom form-check-custom">
+                        <input class="form-check-input" asp-for="CzyDobrowolneChorobowe" />
+                        <label class="form-check-label" asp-for="CzyDobrowolneChorobowe">
+                            🏥 @Html.DisplayNameFor(model => model.CzyDobrowolneChorobowe)
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group-custom" style="margin-top: 2.5rem;">
+            <button type="submit" class="btn-create">✅ Dodaj umowę</button>
+        </div>
+    </form>
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }
