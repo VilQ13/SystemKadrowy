@@ -5,7 +5,6 @@
 }
 
 <style>
-    /* 1. Nagłówek (Finansowy - Zielony) */
     .page-header {
         background: linear-gradient(135deg, #51cf66 0%, #2f9e44 100%);
         color: white;
@@ -26,7 +25,6 @@
             opacity: 0.9;
         }
 
-    /* 2. Link powrotu */
     .back-link {
         display: inline-flex;
         align-items: center;
@@ -43,7 +41,6 @@
             gap: 0.7rem;
         }
 
-    /* 3. Karta Paska Płacowego */
     .payslip-card {
         background: white;
         border-radius: 12px;
@@ -53,7 +50,6 @@
         margin: 0 auto;
     }
 
-    /* Sekcja nagłówkowa w karcie */
     .payslip-header {
         background: #f8f9fa;
         padding: 1.5rem 2rem;
@@ -81,7 +77,6 @@
         font-size: 0.9rem;
     }
 
-    /* Info Banner (Archiwum) */
     .archive-banner {
         background: #fff9db;
         color: #e67700;
@@ -93,18 +88,16 @@
         gap: 0.5rem;
     }
 
-    /* Siatka finansowa */
     .finance-grid {
         display: grid;
-        grid-template-columns: 1fr 1fr; /* Dwie równe kolumny */
-        gap: 0; /* Brak odstępu, linia oddzielająca */
+        grid-template-columns: 1fr 1fr;
+        gap: 0;
     }
 
     .finance-column {
         padding: 2rem;
     }
 
-    /* Linia pionowa między kolumnami (tylko na desktop) */
     @@media (min-width: 768px) {
         .finance-column:first-child
 
@@ -114,7 +107,6 @@
 
     }
 
-    /* Na mobilce jedna pod drugą */
     @@media (max-width: 767px) {
         .finance-grid
 
@@ -137,7 +129,6 @@
         margin-bottom: 1.5rem;
     }
 
-    /* Wiersze z kwotami */
     .amount-row {
         display: flex;
         justify-content: space-between;
@@ -173,7 +164,6 @@
         color: #495057;
     }
 
-    /* Sekcja Netto */
     .net-pay-section {
         background: linear-gradient(135deg, #51cf66 0%, #2f9e44 100%);
         color: white;
@@ -195,7 +185,6 @@
         line-height: 1;
     }
 
-    /* Przyciski na dole */
     .footer-actions {
         padding: 1.5rem;
         background: #f8f9fa;

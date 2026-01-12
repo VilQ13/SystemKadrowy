@@ -11,10 +11,10 @@ namespace SystemKadrowy.Web.Models
         [Display(Name = "Adres Email (Login)")]
         public string Email { get; set; }
 
-        // Lista ról, które użytkownik JUŻ posiada (do wyświetlenia/edycji)
+        // Lista ról, które użytkownik JUŻ posiada
         public IList<string> PrzypisaneRole { get; set; } = new List<string>();
 
-        // Lista WSZYSTKICH ról w systemie (do wyboru w checkboxach)
+        // Lista WSZYSTKICH ról w systemie
         public List<string> DostepneRole { get; set; } = new List<string>();
     }
 }

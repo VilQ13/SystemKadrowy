@@ -17,7 +17,6 @@ namespace SystemKadrowy.Web.Controllers
         private readonly IKalkulatorPlac _kalkulator;
         private readonly AnomalyDetectorService _anomalyService;
 
-        // Konstruktor: Tutaj "prosimy" system o Bazę i Kalkulator
         public WyplatyController(KadryDbContext context, IKalkulatorPlac kalkulator, AnomalyDetectorService anomalyService)
         {
             _context = context;
@@ -25,7 +24,6 @@ namespace SystemKadrowy.Web.Controllers
             _anomalyService = anomalyService;
         }
 
-        // Akcja: Wyświetl listę pracowników, żeby wybrać, komu liczymy wypłatę
         public async Task<IActionResult> Index()
         {
             var pracownicy = await _context.Pracownicy.ToListAsync();
@@ -36,16 +34,16 @@ namespace SystemKadrowy.Web.Controllers
         [HttpGet]
         public async Task<IActionResult> Oblicz(int id, int? rok, int? miesiac, decimal premia = 0, decimal potracenie = 0, decimal godziny = 168)
          {
-            // 1. Domyślne wartości: Jeśli nie podano daty, przyjmij obecny rok i miesiąc
+            // Jeśli nie podano daty, przyjmij obecny rok i miesiąc
             int r = rok ?? DateTime.Now.Year;
             int m = miesiac ?? DateTime.Now.Month;
 
-            // Ustawiamy datę wypłaty (np. 10-ty dzień następnego miesiąca lub ostatni dzień bieżącego)
+            // Ustawiamy datę wypłaty
             // Do sprawdzenia ważności umowy przyjmijmy 1. dzień wybranego miesiąca
             DateTime dataPoczatek = new DateTime(r, m, 1);
             DateTime dataKoniec = dataPoczatek.AddMonths(1).AddDays(-1);
 
-            // 2. Pobieramy pracownika z umowami
+            // Pobieramy pracownika z umowami
             var pracownik = await _context.Pracownicy
                 .Include(p => p.Umowy)
                 .FirstOrDefaultAsync(p => p.Id == id);
@@ -54,7 +52,7 @@ namespace SystemKadrowy.Web.Controllers
 
 
 
-            // 3. LOGIKA CZASU: Szukamy umowy aktywnej w wybranym miesiącu
+            // Szukamy umowy aktywnej w wybranym miesiącu
             // Warunek: Data rozpoczęcia przed lub w trakcie miesiąca ORAZ (Data zakończenia brak LUB po miesiącu)
             var aktywnaUmowa = pracownik.Umowy
                 .Where(u => u.DataRozpoczecia.Date <= dataPoczatek.Date) // Zaczęła się wcześniej lub teraz
@@ -68,24 +66,22 @@ namespace SystemKadrowy.Web.Controllers
 
             if (aktywnaUmowa == null)
             {
-                // Ważne: Informujemy użytkownika, że w TYM konkretnym miesiącu nie ma umowy
+                // Informujemy użytkownika, że w TYM konkretnym miesiącu nie ma umowy
                 return Content($"Pracownik {pracownik.Imie} {pracownik.Nazwisko} nie posiada aktywnej umowy w dniu {dataPoczatek:yyyy-MM-dd}.");
             }
 
             var nieobecnosci = await _context.Nieobecnosci
                 .Where(n => n.PracownikId == id)
-                // Warunek: Nieobecność zachodzi na ten miesiąc
                 .Where(n => n.DataOd <= dataKoniec && n.DataDo >= dataPoczatek)
                 .ToListAsync();
 
-            // 4. Przekazujemy listę do kalkulatora
+            // Przekazujemy listę do kalkulatora
             WynikWyplaty wynik = _kalkulator.Oblicz(aktywnaUmowa, premia, potracenie, godziny, nieobecnosci);
 
             var ostrzezenieAI = await _anomalyService.SprawdzCzyAnomalia(pracownik.Id, premia);
 
             if (ostrzezenieAI != null)
             {
-                // Przekazujemy ostrzeżenie do widoku za pomocą ViewBag
                 ViewBag.AiWarning = ostrzezenieAI;
             }
 
@@ -104,7 +100,7 @@ namespace SystemKadrowy.Web.Controllers
         public async Task<IActionResult> Zatwierdz(int id, int rok, int miesiac, decimal premia = 0, decimal potracenie = 0, decimal godziny = 168)
         {
 
-            // 1. Pobieramy pracownika i umowę dla danej daty
+            // Pobieramy pracownika i umowę dla danej daty
             DateTime dataPoczatek = new DateTime(rok, miesiac, 1);
             DateTime dataKoniec = dataPoczatek.AddMonths(1).AddDays(-1);
 
@@ -122,23 +118,21 @@ namespace SystemKadrowy.Web.Controllers
 
             var nieobecnosci = await _context.Nieobecnosci
                 .Where(n => n.PracownikId == id)
-                // Warunek: Nieobecność zachodzi na ten miesiąc
                 .Where(n => n.DataOd <= dataKoniec && n.DataDo >= dataPoczatek)
                 .ToListAsync();
 
             if (aktywnaUmowa == null) return BadRequest("Nie można zatwierdzić: Brak umowy w wybranym miesiącu.");
 
-            // 2. Sprawdzamy DUPLIKATY (czy wypłata za ten miesiąc już jest?)
+            // 2. Sprawdzamy czy wypłata za ten miesiąc już jest
             bool czyJuzJest = await _context.Wyplaty
                 .AnyAsync(w => w.PracownikId == id && w.Rok == rok && w.Miesiac == miesiac);
 
             if (czyJuzJest)
             {
-                // Tutaj przydałoby się wyświetlić błąd, na razie przekierujmy po prostu
                 return RedirectToAction("Index");
             }
 
-            // 3. Przeliczamy (Snapshot)
+            // 3. Przeliczamy
             WynikWyplaty wynik = _kalkulator.Oblicz(aktywnaUmowa, premia, potracenie, godziny, nieobecnosci);
 
             // 4. Tworzymy rekord historii
@@ -174,10 +168,10 @@ namespace SystemKadrowy.Web.Controllers
             return RedirectToAction("Index"); // Wracamy do listy pracowników
         }
 
-        // GET: Wyplaty/Details/5 (Tu ID to ID wypłaty, a nie pracownika!)
+        // GET: Wyplaty/Details/5
         public async Task<IActionResult> Details(int id)
         {
-            // Pobieramy wypłatę razem z danymi pracownika (żeby wyświetlić Imię i Nazwisko na pasku)
+            // Pobieramy wypłatę razem z danymi pracownika
             var wyplata = await _context.Wyplaty
                 .Include(w => w.Pracownik)
                 .FirstOrDefaultAsync(w => w.Id == id);
@@ -191,7 +185,7 @@ namespace SystemKadrowy.Web.Controllers
         public async Task<IActionResult> Drukuj(int id)
         {
             var wyplata = await _context.Wyplaty
-                .Include(w => w.Pracownik) // Musimy mieć dane osobowe
+                .Include(w => w.Pracownik)
                 .FirstOrDefaultAsync(w => w.Id == id);
 
             if (wyplata == null) return NotFound();
@@ -203,18 +197,18 @@ namespace SystemKadrowy.Web.Controllers
         [Authorize(Roles = "Admin,Place")] // Tylko uprawnieni mogą pobierać
         public async Task<IActionResult> EksportExcel()
         {
-            // 1. Pobierz dane z bazy
+            // Pobierz dane z bazy
             var wyplaty = await _context.Wyplaty
                 .Include(w => w.Pracownik)
                 .OrderByDescending(w => w.DataGenerowania)
                 .ToListAsync();
 
-            // 2. Stwórz wirtualny plik Excela
+            // Stwórz wirtualny plik Excela
             using (var workbook = new XLWorkbook())
             {
                 var worksheet = workbook.Worksheets.Add("Lista Płac");
 
-                // 3. Nagłówki tabeli
+                // Nagłówki tabeli
                 worksheet.Cell(1, 1).Value = "Imię i Nazwisko";
                 worksheet.Cell(1, 2).Value = "Data Wypłaty";
                 worksheet.Cell(1, 3).Value = "Brutto";
@@ -222,12 +216,12 @@ namespace SystemKadrowy.Web.Controllers
                 worksheet.Cell(1, 5).Value = "Koszt Pracodawcy";
                 worksheet.Cell(1, 6).Value = "Numer Konta";
 
-                // Stylizacja nagłówka (pogrubienie + tło)
+                // Stylizacja nagłówka
                 var naglowek = worksheet.Range("A1:F1");
                 naglowek.Style.Font.Bold = true;
                 naglowek.Style.Fill.BackgroundColor = XLColor.LightGray;
 
-                // 4. Wypełnianie danych (wiersz po wierszu)
+                // Wypełnianie danych
                 int row = 2;
                 foreach (var w in wyplaty)
                 {
@@ -248,10 +242,10 @@ namespace SystemKadrowy.Web.Controllers
                     row++;
                 }
 
-                // 5. Dopasuj szerokość kolumn do treści
+                // Dopasuj szerokość kolumn do treści
                 worksheet.Columns().AdjustToContents();
 
-                // 6. Zamień obiekt Excela na strumień bajtów (plik)
+                // Zamień obiekt Excela na strumień bajtów (plik)
                 using (var stream = new MemoryStream())
                 {
                     workbook.SaveAs(stream);
@@ -269,7 +263,7 @@ namespace SystemKadrowy.Web.Controllers
         public async Task<IActionResult> Historia()
         {
             var wyplaty = await _context.Wyplaty
-                .Include(w => w.Pracownik) // Dołączamy pracownika, żeby widzieć nazwisko
+                .Include(w => w.Pracownik)
                 .OrderByDescending(w => w.Rok)
                 .ThenByDescending(w => w.Miesiac)
                 .ToListAsync();

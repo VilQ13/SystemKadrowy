@@ -27,7 +27,7 @@ namespace SystemKadrowy.Web
             .AddRoles<IdentityRole>()
             .AddEntityFrameworkStores<KadryDbContext>();
 
-            // Rejestracja serwisu obliczeniowego
+            // Rejestracja serwisów
             builder.Services.AddScoped<IKalkulatorPlac, KalkulatorPlacService>();
             builder.Services.AddScoped<SystemKadrowy.Web.Services.AnomalyDetectorService>();
             builder.Services.AddTransient<SystemKadrowy.Web.Services.DaneTestoweSeeder>();
@@ -44,7 +44,7 @@ namespace SystemKadrowy.Web
 
             var defaultDateCulture = "pl-PL";
             var ci = new CultureInfo(defaultDateCulture);
-            // Opcjonalnie: Upewniamy siê, ¿e liczby maj¹ przecinek, a waluta to z³
+            // Upewniamy siê, ¿e liczby maj¹ przecinek, a waluta to z³
             ci.NumberFormat.NumberDecimalSeparator = ",";
             ci.NumberFormat.CurrencyDecimalSeparator = ",";
 
@@ -85,14 +85,14 @@ namespace SystemKadrowy.Web
 
                 try
                 {
-                    // 1. Migracja Bazy (Tworzenie struktury)
+                    // Migracja Bazy (Tworzenie struktury)
                     var context = services.GetRequiredService<KadryDbContext>();
                     context.Database.Migrate();
 
-                    // 2. Seeder U¿ytkowników i Ról
+                    // Seeder U¿ytkowników i Ról
                     SystemKadrowy.Web.Services.UserSeeder.SeedRolesAndAdminAsync(services).Wait();
 
-                    // 3. Seeder Danych Testowych
+                    // Seeder Danych Testowych
                     var dataSeeder = services.GetRequiredService<SystemKadrowy.Web.Services.DaneTestoweSeeder>();
                     dataSeeder.ZainicjujDane().Wait();
                 }

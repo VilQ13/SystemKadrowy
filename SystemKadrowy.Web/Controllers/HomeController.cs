@@ -21,18 +21,17 @@ namespace SystemKadrowy.Web.Controllers
 
         public async Task<IActionResult> Index()
         {
-            // Tworzymy pusty model
             var model = new DashboardViewModel();
 
-            // Sprawdzamy, czy u¿ytkownik jest zalogowany
+            // Czy u¿ytkownik jest zalogowany
             if (User.Identity != null && User.Identity.IsAuthenticated)
             {
-                // --- LOGIKA DLA KADR (i Admina) ---
+                // --- LOGIKA DLA KADR i Admina ---
                 if (User.IsInRole("Kadry") || User.IsInRole("Admin"))
                 {
                     model.LiczbaPracownikow = await _context.Pracownicy.CountAsync();
 
-                    // Liczymy aktywne umowy (uproszczony warunek: data koñca jest w przysz³oœci lub null)
+                    // Liczymy aktywne umowy
                     model.LiczbaAktywnychUmow = await _context.Umowy
                         .CountAsync(u => u.DataZakonczenia == null || u.DataZakonczenia >= DateTime.Now);
 
@@ -43,7 +42,7 @@ namespace SystemKadrowy.Web.Controllers
                         .ToListAsync();
                 }
 
-                // --- LOGIKA DLA P£AC (i Admina) ---
+                // --- LOGIKA DLA P£AC i Admina ---
                 if (User.IsInRole("Place") || User.IsInRole("Admin"))
                 {
                     var teraz = DateTime.Now;

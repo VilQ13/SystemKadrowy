@@ -28,15 +28,13 @@ namespace SystemKadrowy.Web.Services
 
             for (int i = 0; i < liczbaPracownikow; i++)
             {
-                // 1. Generujemy dane osobowe
+                // Generujemy dane osobowe
                 string imie = faker.Name.FirstName();
                 string nazwisko = faker.Name.LastName();
                 string email = faker.Internet.Email(imie, nazwisko);
+                string pesel = faker.Person.Pesel(); // Unikalny PESEL
 
-                // Unikalny PESEL (Bogus ma generator PESELi!)
-                string pesel = faker.Person.Pesel();
-
-                // 2. Tworzymy PRACOWNIKA
+                // Tworzymy PRACOWNIKA
                 var pracownik = new Pracownik
                 {
                     Imie = imie,
@@ -47,7 +45,7 @@ namespace SystemKadrowy.Web.Services
                     Telefon = faker.Phone.PhoneNumber(),
                     NumerKontaBankowego = faker.Finance.Iban(),
 
-                    // Generujemy też adres
+                    // Generujemy adres
                     AdresZamieszkania = new Adres
                     {
                         Ulica = faker.Address.StreetName(),
@@ -60,25 +58,24 @@ namespace SystemKadrowy.Web.Services
                     }
                 };
 
-                // 3. Tworzymy KONTO UŻYTKOWNIKA (Identity)
-                // To jest ten kluczowy moment, którego nie zrobiłbyś importując CSV
+                // Tworzymy KONTO UŻYTKOWNIKA
                 var user = new IdentityUser { UserName = email, Email = email, EmailConfirmed = true };
                 var result = await _userManager.CreateAsync(user, "Start123!"); // Każdy ma hasło Start123!
 
                 if (result.Succeeded)
                 {
-                    // Przypiszmy losowo rolę (np. co 10-ty to Kadrowiec)
+                    // Przypiszmy losowo rolę
                     if (i % 10 == 0) await _userManager.AddToRoleAsync(user, "Kadry");
                     else if (i % 15 == 0) await _userManager.AddToRoleAsync(user, "Place");
 
-                    // Wymuszona zmiana hasła (nasz ficzer!)
+                    // Wymuszona zmiana hasła
                     await _userManager.AddClaimAsync(user, new System.Security.Claims.Claim("WymuszonaZmianaHasla", "Tak"));
 
                     // Zapisujemy pracownika do bazy kadr
                     _context.Pracownicy.Add(pracownik);
-                    await _context.SaveChangesAsync(); // Musimy zapisać, żeby dostać ID pracownika
+                    await _context.SaveChangesAsync();
 
-                    // 4. Dodajemy UMOWĘ (żeby można było liczyć wypłaty)
+                    // Dodajemy UMOWĘ
                     var umowa = new Umowa
                     {
                         PracownikId = pracownik.Id,
@@ -90,14 +87,13 @@ namespace SystemKadrowy.Web.Services
                     };
                     _context.Umowy.Add(umowa);
 
-                    // 5. Generujemy HISTORIĘ WYPŁAT (Dla Twojego AI!)
-                    // Wygenerujmy wypłaty za ostatnie 6 miesięcy
+                    // Generujemy wypłaty za ostatnie 6 miesięcy
                     for (int m = 1; m <= 6; m++)
                     {
                         var dataWyplaty = DateTime.Now.AddMonths(-m);
                         decimal premia = faker.Random.Bool(0.3f) ? faker.Random.Decimal(200, 1000) : 0; // 30% szans na premię
 
-                        // Uproszczona symulacja danych finansowych (tylko żeby były w bazie)
+                        // Uproszczona symulacja danych finansowych
                         decimal brutto = umowa.StawkaBrutto + premia;
                         decimal netto = brutto * 0.7m; // Przybliżenie
 

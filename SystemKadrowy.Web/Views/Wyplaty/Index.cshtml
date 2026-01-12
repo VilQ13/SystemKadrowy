@@ -6,8 +6,6 @@
 }
 
 <style>
-    /* 1. Nagłówek (Finansowy - Zielono-Turkusowy lub spójny Niebieski)
-           Użyjmy Niebieskiego dla spójności list, ale z ikoną pieniędzy */
     .page-header {
         background: linear-gradient(135deg, #4dabf7 0%, #339af0 100%);
         color: white;
@@ -28,14 +26,13 @@
             opacity: 0.9;
         }
 
-    /* 2. Panel Sterowania (Generator) */
     .control-panel {
         background: white;
         border-radius: 12px;
         padding: 1.5rem 2rem;
         box-shadow: 0 2px 8px rgba(0,0,0,0.08);
         margin-bottom: 2rem;
-        border-left: 5px solid #51cf66; /* Zielony akcent oznaczający finanse */
+        border-left: 5px solid #51cf66;
         display: flex;
         flex-wrap: wrap;
         align-items: center;
@@ -71,7 +68,6 @@
             outline: none;
         }
 
-    /* 3. Przyciski w panelu */
     .btn-history {
         background: white;
         color: #495057;
@@ -93,7 +89,7 @@
         }
 
     .btn-excel {
-        background: #207245; /* Excel Green */
+        background: #207245;
         color: white;
         padding: 0.6rem 1.2rem;
         border-radius: 8px;
@@ -112,7 +108,6 @@
             transform: translateY(-2px);
         }
 
-    /* 4. Tabela */
     .card-table {
         background: white;
         border-radius: 12px;
@@ -157,7 +152,6 @@
             border: none;
         }
 
-    /* 5. Przycisk "Oblicz" w tabeli */
     .btn-salary {
         background: #51cf66;
         color: white;
@@ -241,7 +235,6 @@
     <script>
         function zaktualizujLinki() {
             var dataInput = document.getElementById('okres').value;
-            // Zabezpieczenie na wypadek pustej daty
             if (!dataInput) return;
 
             var czesci = dataInput.split('-');
@@ -253,7 +246,6 @@
             for (var i = 0; i < przyciski.length; i++) {
                 var btn = przyciski[i];
                 var idPracownika = btn.getAttribute('data-id');
-                // Generowanie poprawnego linku
                 var nowyLink = '/Wyplaty/Oblicz/' + idPracownika + '?rok=' + rok + '&miesiac=' + miesiac;
                 btn.href = nowyLink;
             }

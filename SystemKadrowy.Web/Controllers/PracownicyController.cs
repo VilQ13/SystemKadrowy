@@ -39,8 +39,8 @@ namespace SystemKadrowy.Web.Controllers
             if (id == null) return NotFound();
 
             var pracownik = await _context.Pracownicy
-                .Include(p => p.Umowy)   // Warto widzieć też umowy
-                .Include(p => p.Wyplaty) // <--- DODAJ TO (Ładujemy historię)
+                .Include(p => p.Umowy)   // Ładujemy umowy
+                .Include(p => p.Wyplaty) // Ładujemy historię
                 .Include(p => p.AdresZamieszkania)
                 .ThenInclude(a => a.KodPocztowy)
                 .FirstOrDefaultAsync(m => m.Id == id);
@@ -108,14 +108,13 @@ namespace SystemKadrowy.Web.Controllers
                     };
 
                     // Ustalamy hasło startowe. 
-                    // W prawdziwym projekcie wysłałbyś je mailem lub wymusił zmianę przy pierwszym logowaniu.
                     string hasloStartowe = "Start123!";
 
                     var result = await _userManager.CreateAsync(nowyUser, hasloStartowe);
 
                     if (result.Succeeded)
                     {
-                        // NOWOŚĆ: Dodajemy "naklejkę" (Claim), że hasło musi być zmienione
+                        // Dodajemy Claim, że hasło musi być zmienione
                         await _userManager.AddClaimAsync(nowyUser, new Claim("WymuszonaZmianaHasla", "Tak"));
                     }
 
@@ -128,32 +127,28 @@ namespace SystemKadrowy.Web.Controllers
                         }
                         return View(pracownik); // Przerywamy, nie tworzymy pracownika
                     }
-
-                    // Opcjonalnie: Możesz tutaj dodać użytkownika do roli, np. "Pracownik"
-                    // await _userManager.AddToRoleAsync(nowyUser, "Pracownik");
                 }
 
                 // --- LOGIKA ZAPISU ZDJĘCIA ---
                 if (plikZdjecia != null)
                 {
-                    // 1. Gdzie zapisać? (Folder wwwroot/zdjecia)
+                    // Gdzie zapisać? (Folder wwwroot/zdjecia)
                     string folderZdjec = Path.Combine(_hostEnvironment.WebRootPath, "zdjecia");
 
                     // Upewnij się, że folder istnieje
                     if (!Directory.Exists(folderZdjec)) Directory.CreateDirectory(folderZdjec);
 
-                    // 2. Unikalna nazwa pliku (żeby dwa pliki 'profilowe.jpg' się nie nadpisały)
-                    // Tworzymy np. "profilowe_GUID.jpg"
+                    // Unikalna nazwa pliku np. "profilowe_GUID.jpg"
                     string unikalnaNazwa = Guid.NewGuid().ToString() + "_" + plikZdjecia.FileName;
                     string sciezkaPliku = Path.Combine(folderZdjec, unikalnaNazwa);
 
-                    // 3. Fizyczny zapis na dysk
+                    // Fizyczny zapis na dysk
                     using (var fileStream = new FileStream(sciezkaPliku, FileMode.Create))
                     {
                         await plikZdjecia.CopyToAsync(fileStream);
                     }
 
-                    // 4. Zapisanie ścieżki w bazie (tylko nazwa pliku)
+                    // Zapisanie ścieżki w bazie (tylko nazwa pliku)
                     pracownik.ZdjecieSciezka = unikalnaNazwa;
                 }
                 // -----------------------------
@@ -219,31 +214,29 @@ namespace SystemKadrowy.Web.Controllers
                 // --- LOGIKA ZAPISU ZDJĘCIA ---
                 if (plikZdjecia != null)
                 {
-                    // 1. Gdzie zapisać? (Folder wwwroot/zdjecia)
+                    // Gdzie zapisać? (Folder wwwroot/zdjecia)
                     string folderZdjec = Path.Combine(_hostEnvironment.WebRootPath, "zdjecia");
 
                     // Upewnij się, że folder istnieje
                     if (!Directory.Exists(folderZdjec)) Directory.CreateDirectory(folderZdjec);
 
-                    // 2. Unikalna nazwa pliku (żeby dwa pliki 'profilowe.jpg' się nie nadpisały)
-                    // Tworzymy np. "profilowe_GUID.jpg"
+                    // Unikalna nazwa pliku np. "profilowe_GUID.jpg"
                     string unikalnaNazwa = Guid.NewGuid().ToString() + "_" + plikZdjecia.FileName;
                     string sciezkaPliku = Path.Combine(folderZdjec, unikalnaNazwa);
 
-                    // 3. Fizyczny zapis na dysk
+                    // Fizyczny zapis na dysk
                     using (var fileStream = new FileStream(sciezkaPliku, FileMode.Create))
                     {
                         await plikZdjecia.CopyToAsync(fileStream);
                     }
 
-                    // 4. Zapisanie ścieżki w bazie (tylko nazwa pliku)
+                    // Zapisanie ścieżki w bazie (tylko nazwa pliku)
                     pracownik.ZdjecieSciezka = unikalnaNazwa;
                 }
                 else
                 {
-
+                    // Jeżeli zdjęcie nie jest podane to, nic nie musimy robić
                 }
-                    // -----------------------------
 
                 try
                 {

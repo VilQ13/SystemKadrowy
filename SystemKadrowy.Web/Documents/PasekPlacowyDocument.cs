@@ -55,7 +55,6 @@ namespace SystemKadrowy.Web.Documents
                 // Sekcja 1: Dane pracownika
                 column.Item().Text("Dane Pracownika").FontSize(14).Bold();
 
-                // POPRAWKA: Zmiana Colors.Grey.Light na Colors.Grey.Lighten1
                 column.Item().BorderBottom(1).BorderColor(Colors.Grey.Lighten1).PaddingBottom(5);
 
                 column.Item().PaddingTop(5).Row(row =>
@@ -87,11 +86,11 @@ namespace SystemKadrowy.Web.Documents
 
                     // --- Wiersze tabeli ---
 
-                    // 1. Podstawa
+                    // Podstawa
                     table.Cell().Element(BlockStyle).Text("Wynagrodzenie Brutto (Podstawa)");
                     table.Cell().Element(BlockStyle).AlignRight().Text($"{_wyplata.Brutto:N2}");
 
-                    // 2. Dodatki
+                    // Dodatki
                     if (_wyplata.PremiaBrutto > 0)
                     {
                         table.Cell().Element(BlockStyle).Text("Premia Regulaminowa");
@@ -104,12 +103,11 @@ namespace SystemKadrowy.Web.Documents
                         table.Cell().Element(BlockStyle).AlignRight().Text($"{_wyplata.WynagrodzenieChorobowe:N2}");
                     }
 
-                    // 3. Suma Przychodu
+                    // Suma Przychodu
                     table.Cell().Element(SummaryStyle).Text("SUMA PRZYCHODU (Brutto)");
                     table.Cell().Element(SummaryStyle).AlignRight().Text($"{_wyplata.CalicowiteBrutto:N2}");
 
-                    // 4. Potrącenia (ZUS, Zdrowotna, PIT)
-                    // UWAGA: Tutaj kolejność .Text().FontColor() jest kluczowa!
+                    // Potrącenia (ZUS, Zdrowotna, PIT)
 
                     table.Cell().Element(BlockStyle).Text("Składki ZUS (Emerytalne, Rentowe, Chorobowe)");
                     table.Cell().Element(BlockStyle).AlignRight().Text($"-{_wyplata.ZUS_Razem:N2}").FontColor(Colors.Red.Medium);
@@ -126,7 +124,7 @@ namespace SystemKadrowy.Web.Documents
                         table.Cell().Element(BlockStyle).AlignRight().Text($"-{_wyplata.PotraceniaKomornicze:N2}").FontColor(Colors.Red.Medium);
                     }
 
-                    // 5. DO WYPŁATY
+                    // DO WYPŁATY
                     table.Cell().Element(NettoStyle).Text("DO WYPŁATY (NETTO)");
                     table.Cell().Element(NettoStyle).AlignRight().Text($"{_wyplata.DoWyplaty:N2} zł");
 
@@ -148,7 +146,6 @@ namespace SystemKadrowy.Web.Documents
         {
             container.Column(column =>
             {
-                // POPRAWKA: Zmiana Colors.Grey.Light na Colors.Grey.Lighten1
                 column.Item().PaddingTop(10).BorderTop(1).BorderColor(Colors.Grey.Lighten1);
 
                 column.Item().AlignCenter().Text(x =>

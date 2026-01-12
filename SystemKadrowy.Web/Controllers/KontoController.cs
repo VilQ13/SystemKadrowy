@@ -5,7 +5,7 @@ using System.Security.Claims;
 
 namespace SystemKadrowy.Web.Controllers
 {
-    [Authorize] // Tylko zalogowani
+    [Authorize] // Tylko zalogowanych
     public class KontoController : Controller
     {
         private readonly UserManager<IdentityUser> _userManager;
@@ -36,7 +36,7 @@ namespace SystemKadrowy.Web.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return RedirectToAction("Index", "Home");
 
-            // 1. Próba zmiany hasła
+            // Próba zmiany hasła
             var result = await _userManager.ChangePasswordAsync(user, stareHaslo, noweHaslo);
 
             if (!result.Succeeded)
@@ -48,7 +48,7 @@ namespace SystemKadrowy.Web.Controllers
                 return View();
             }
 
-            // 2. Sukces! Odklejamy "naklejkę" (usuwamy Claim)
+            // Usuwamy Claim
             var claim = (await _userManager.GetClaimsAsync(user))
                         .FirstOrDefault(c => c.Type == "WymuszonaZmianaHasla");
 
@@ -57,7 +57,7 @@ namespace SystemKadrowy.Web.Controllers
                 await _userManager.RemoveClaimAsync(user, claim);
             }
 
-            // 3. WAŻNE: Po zmianie hasła system wylogowuje usera (zmienia się SecurityStamp).
+            // WAŻNE: Po zmianie hasła system wylogowuje usera (zmienia się SecurityStamp).
             // Musimy go zalogować ponownie automatycznie, żeby nie wyrzuciło go z systemu.
             await _signInManager.RefreshSignInAsync(user);
 

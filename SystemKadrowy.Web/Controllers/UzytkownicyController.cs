@@ -10,7 +10,7 @@ namespace SystemKadrowy.Web.Controllers
     public class UzytkownicyController : Controller
     {
         private readonly UserManager<IdentityUser> _userManager;
-        private readonly RoleManager<IdentityRole> _roleManager; // <-- NOWOŚĆ: Zarządzanie rolami
+        private readonly RoleManager<IdentityRole> _roleManager;
 
         public UzytkownicyController(UserManager<IdentityUser> userManager, RoleManager<IdentityRole> roleManager)
         {
@@ -22,8 +22,6 @@ namespace SystemKadrowy.Web.Controllers
         public async Task<IActionResult> Index()
         {
             var uzytkownicy = await _userManager.Users.ToListAsync();
-            // Możemy tu dodać ViewModel, żeby wyświetlić też role na liście, 
-            // ale na razie prosta lista wystarczy.
             return View(uzytkownicy);
         }
 
@@ -62,7 +60,7 @@ namespace SystemKadrowy.Web.Controllers
 
             if (ModelState.IsValid)
             {
-                // 1. Aktualizacja Emaila/Loginu
+                // Aktualizacja Emaila/Loginu
                 if (user.Email != model.Email)
                 {
                     user.Email = model.Email;
@@ -70,24 +68,15 @@ namespace SystemKadrowy.Web.Controllers
                     await _userManager.UpdateAsync(user);
                 }
 
-                // 2. Aktualizacja Ról (To jest kluczowa część)
+                // Aktualizacja Ról
 
-                // A. Pobierz aktualne role z bazy
+                // Pobierz aktualne role z bazy
                 var obecneRole = await _userManager.GetRolesAsync(user);
 
-                // B. Pobierz role wybrane w formularzu (checkboxy)
-                // (W tym prostym przykładzie zakładamy, że model.PrzypisaneRole zawiera zaznaczone)
-                // Uwaga: W widoku użyjemy sprytnego triku z nazwami checkboxów.
-                // Tutaj musimy odczytać formularz ręcznie lub dostosować model pod checkboxy.
-                // Zróbmy prościej: Przekażemy wybrane role przez osobny parametr lub "Request.Form".
-
-                // Dla uproszczenia edukacyjnego:
-                // Usuwamy użytkownika ze wszystkich ról i dodajemy do wybranych.
-                // W produkcji robi się to bardziej "delta" (tylko różnice), ale tak jest czytelniej:
-
+                // Usuwamy użytkownika ze wszystkich ról i dodajemy do wybranych
                 await _userManager.RemoveFromRolesAsync(user, obecneRole);
 
-                // Pobieramy zaznaczone role z formularza (ponieważ List<string> w modelu słabo wiąże checkboxy)
+                // Pobieramy zaznaczone role z formularza
                 var wybraneRole = Request.Form["WybraneRole"].ToList();
 
                 if (wybraneRole.Any())
@@ -122,8 +111,6 @@ namespace SystemKadrowy.Web.Controllers
             var user = await _userManager.FindByIdAsync(id);
             if (user != null)
             {
-                // Opcjonalnie: Najpierw usuń pracownika powiązanego z tym kontem?
-                // Tutaj usuwamy tylko login (dostęp). Dane kadrowe zostają bezpieczne.
                 await _userManager.DeleteAsync(user);
             }
             return RedirectToAction(nameof(Index));
