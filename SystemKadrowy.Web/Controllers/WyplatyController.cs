@@ -76,7 +76,7 @@ namespace SystemKadrowy.Web.Controllers
                 .ToListAsync();
 
             // Przekazujemy listę do kalkulatora
-            WynikWyplaty wynik = _kalkulator.Oblicz(aktywnaUmowa, premia, potracenie, godziny, nieobecnosci);
+            WynikWyplaty wynik = _kalkulator.Oblicz(aktywnaUmowa, pracownik.DataUrodzenia, dataPoczatek, premia, potracenie, godziny, nieobecnosci);
 
             var ostrzezenieAI = await _anomalyService.SprawdzCzyAnomalia(pracownik.Id, premia);
 
@@ -133,7 +133,7 @@ namespace SystemKadrowy.Web.Controllers
             }
 
             // 3. Przeliczamy
-            WynikWyplaty wynik = _kalkulator.Oblicz(aktywnaUmowa, premia, potracenie, godziny, nieobecnosci);
+            WynikWyplaty wynik = _kalkulator.Oblicz(aktywnaUmowa, pracownik.DataUrodzenia, dataPoczatek, premia, potracenie, godziny, nieobecnosci);
 
             // 4. Tworzymy rekord historii
             var nowaWyplata = new Wyplata

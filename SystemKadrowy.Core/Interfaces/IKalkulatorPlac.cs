@@ -34,7 +34,9 @@ namespace SystemKadrowy.Core.Interfaces
     public interface IKalkulatorPlac
     {
         WynikWyplaty Oblicz(
-            Umowa umowa, 
+            Umowa umowa,
+            DateTime dataUrodzenia,
+            DateTime dataObliczen,
             decimal premia = 0, 
             decimal potracenie = 0, 
             decimal godziny = 168, 

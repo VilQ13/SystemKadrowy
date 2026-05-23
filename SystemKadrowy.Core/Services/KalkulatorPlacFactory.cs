@@ -12,7 +12,7 @@ namespace SystemKadrowy.Core.Services
     public class KalkulatorPlacService : IKalkulatorPlac
     {
         // Główna metoda
-        public WynikWyplaty Oblicz(Umowa umowa, decimal premia = 0, decimal potracenie = 0, decimal godziny = 168, List<Nieobecnosc>? nieobecnosci = null)
+        public WynikWyplaty Oblicz(Umowa umowa, DateTime dataUrodzenia, DateTime dataObliczen, decimal premia = 0, decimal potracenie = 0, decimal godziny = 168, List<Nieobecnosc>? nieobecnosci = null)
         {
             decimal bazaBrutto = 0;
 
@@ -21,6 +21,9 @@ namespace SystemKadrowy.Core.Services
 
             int sumaDni = 0;
             decimal sumaGodzin = 0;
+
+            int wiek = dataObliczen.Year - dataUrodzenia.Year;
+            if (dataUrodzenia.Date > dataObliczen.AddYears(-wiek)) wiek--;
 
             if (umowa.SposobWynagradzania == SposobWynagradzania.StalaMiesieczna)
             {
@@ -80,11 +83,11 @@ namespace SystemKadrowy.Core.Services
             switch (umowa.TypUmowy)
             {
                 case TypUmowy.UmowaOPrace:
-                    wynik = ObliczUoP(umowa, podstawaPoPotraceniach, premia, potracenie, wyliczoneChorobowe, wyliczonePotracenieZaDni);
+                    wynik = ObliczUoP(umowa, podstawaPoPotraceniach, premia, potracenie, wyliczoneChorobowe, wyliczonePotracenieZaDni, wiek);
                     break;
 
                 case TypUmowy.UmowaZlecenie:
-                    wynik = ObliczZlecenie(umowa, podstawaPoPotraceniach, premia, potracenie);
+                    wynik = ObliczZlecenie(umowa, podstawaPoPotraceniach, premia, potracenie, wiek);
                     break;
 
                 //case TypUmowy.UmowaODzielo:
@@ -107,7 +110,7 @@ namespace SystemKadrowy.Core.Services
             return wynik;
         }
 
-        private WynikWyplaty ObliczUoP(Umowa umowa, decimal wyliczonaPodstawa, decimal premia, decimal komornik, decimal chorobowe, decimal potracenieNieobecnosc)
+        private WynikWyplaty ObliczUoP(Umowa umowa, decimal wyliczonaPodstawa, decimal premia, decimal komornik, decimal chorobowe, decimal potracenieNieobecnosc, int wiek)
         {
             var w = new WynikWyplaty();
 
@@ -132,7 +135,7 @@ namespace SystemKadrowy.Core.Services
             w.CalicowiteBrutto = podstawaZusSpoleczny + w.WynagrodzenieChorobowe;
 
             decimal podstawaZdr = w.CalicowiteBrutto - w.ZUS_Razem;
-            w.SkladkaZdrowotna = Math.Round(podstawaZdr * 0.09m, 2);
+            w.SkladkaZdrowotna = Math.Round(podstawaZdr * 0.10m, 2);
 
             // Podatek
             w.KosztyUzyskania = umowa.CzyKosztyPodwyzszone ? 300m : 250m;
@@ -146,6 +149,11 @@ namespace SystemKadrowy.Core.Services
 
             w.Podatek = Math.Max(0, Math.Round(podatekWstepny - ulga, 0));
 
+            if (wiek < 26)
+            {
+                w.Podatek = 0;
+            }
+
             // Netto
             w.Netto = w.CalicowiteBrutto - w.ZUS_Razem - w.SkladkaZdrowotna - w.Podatek;
 
@@ -155,7 +163,7 @@ namespace SystemKadrowy.Core.Services
             return w;
         }
 
-        private WynikWyplaty ObliczZlecenie(Umowa umowa, decimal wyliczonaPodstawa, decimal premia, decimal potracenie)
+        private WynikWyplaty ObliczZlecenie(Umowa umowa, decimal wyliczonaPodstawa, decimal premia, decimal potracenie, int wiek)
         {
             var w = new WynikWyplaty();
 
@@ -165,12 +173,16 @@ namespace SystemKadrowy.Core.Services
 
             w.CalicowiteBrutto = w.Brutto + w.PremiaBrutto;
 
+
+
             // CASE: Student do 26 lat (Zerowy PIT, Brak ZUS)
             // W uproszczeniu: Brutto = Netto
-            if (umowa.CzyStudent)
+            if (umowa.CzyStudent && wiek < 26)
             {
-                w.Netto = w.CalicowiteBrutto; 
+                w.Netto = w.CalicowiteBrutto;
                 w.DoWyplaty = w.Netto - w.PotraceniaKomornicze;
+                w.Podatek = 0;
+                w.ZUS_Razem = 0;
                 return w;
             }
 
