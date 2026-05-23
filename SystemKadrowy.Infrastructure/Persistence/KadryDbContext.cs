@@ -6,10 +6,11 @@ using System.Text;
 using System.Threading.Tasks;
 using SystemKadrowy.Core.Domain;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 
 namespace SystemKadrowy.Infrastructure.Persistence
 {
-    public class KadryDbContext : IdentityDbContext
+    public class KadryDbContext : IdentityDbContext<IdentityUser>
     {
         public KadryDbContext(DbContextOptions<KadryDbContext> options) : base(options)
         {
